@@ -28,7 +28,7 @@ variable "rancher_master_nodes" {
 
   // Validate that ip is a number between 2 and 25
   validation {
-    condition     = alltrue([for n in var.rancher_master_nodes : n.ip > 1 && n.ip < 26])
-    error_message = "The master node IP must be a number between 2 and 25."
+    condition     = alltrue([for n in var.rancher_master_nodes : n.ip > 1 && n.ip < 255])
+    error_message = "The master node IP must be a number between 2 and 254."
   }
 }
