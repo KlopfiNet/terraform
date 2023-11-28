@@ -1,10 +1,15 @@
-# terraform-rancher
-Terraform repo for rancher stuff
+# terraform-kubernetes
+Repo contains IaC code to bootstrap kubernetes node machines.
 
-## ToDo
-- [ ] Add post provision steps after VM creation
-  - [ ] Join RKE2 nodes
-  - [ ] Install rancher helm
-  - [ ] Add to Load Balancer config
-- [ ] Set up DNS for Vault and hypervisor
-- [ ] Add backend for statefile
+Built for Proxmox `8.1.3`.
+
+## Usage
+Prepare a few env vars:
+```bash
+export TF_LOG="" # Set to DEBUG if need be
+export VAULT_ADDR="http://10.0.1.152:8200"
+export VAULT_TOKEN="..."
+
+# Proxmox root user password
+export TF_VAR_pve_password="..."
+```
