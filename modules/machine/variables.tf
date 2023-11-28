@@ -83,6 +83,12 @@ variable "node_cpu_sockets" {
   type        = number
 }
 
+variable "kubernetes_version" {
+  description = "Kubernetes version"
+  type        = string
+  default     = "v1.27.4"
+}
+
 // TO MOVE
 /*
 variable "cluster_name" {
