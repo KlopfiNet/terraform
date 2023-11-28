@@ -1,8 +1,8 @@
 terraform {
   required_providers {
     proxmox = {
-      source  = "telmate/proxmox"
-      version = ">=2.9.14"
+      source  = "bpg/proxmox"
+      version = "0.38.1"
     }
   }
 }
@@ -12,40 +12,51 @@ provider "vault" {
   #token = VAULT_TOKEN ENV VAR
 }
 
-data "vault_generic_secret" "pm_api_token_id" {
-  path = "secret/proxmox/api_token_id"
-}
-
-data "vault_generic_secret" "pm_api_token_secret" {
-  path = "secret/proxmox/api_token_secret"
-}
-
 provider "proxmox" {
-  pm_tls_insecure     = true
-  pm_api_url          = "https://10.0.1.10:8006/api2/json"
-  pm_api_token_id     = data.vault_generic_secret.pm_api_token_id.data["value"]
-  pm_api_token_secret = data.vault_generic_secret.pm_api_token_secret.data["value"]
+  endpoint = "https://10.0.1.10:8006/"
+  insecure = true
+  tmp_dir  = "/var/tmp"
+
+  // Expected format: <user>@<node>!<token_name>=<token_secret>
+  // Does not work for kvm_args because bullshit
+  //api_token = "${data.vault_generic_secret.pm_api_token_id.data["value"]}=${data.vault_generic_secret.pm_api_token_secret.data["value"]}"
+
+  // This is required, see above
+  username = "${var.pve_user}@pam"
+  password = var.pve_password
+
+  ssh {
+    // Required for certain actions that are not possible with just the API alone
+    username = var.pve_user
+    agent    = true
+  }
 }
 
-// Reference the modules/rancher-mgmt module
-module "rancher_mgmt" {
-  source = "./modules/rancher-mgmt"
+# -------------------------------------------
 
-  cluster_name = "rancher"
-  cluster_fqdn = "rancher.klofpi.net"
+module "machine" {
+  source = "./modules/machine"
 
-  rancher_master_nodes = [
+  // Vars here
+  nodes = [
     {
-      name = "rancher-master-01"
-      ip   = 2
+      name     = "kubernetes-master-01"
+      ip_octet = 80
+      vm_id    = 900
     },
     {
-      name = "rancher-master-02"
-      ip   = 3
+      name     = "kubernetes-master-02"
+      ip_octet = 81
+      vm_id    = 901
     },
     {
-      name = "rancher-master-03"
-      ip   = 4
+      name     = "kubernetes-master-03"
+      ip_octet = 82
+      vm_id    = 902
     }
   ]
+
+  node_cpu_sockets = 1
+  node_cpu_cores   = 1
+  node_memory      = 3072
 }
