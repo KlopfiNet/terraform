@@ -15,7 +15,7 @@ terraform {
       version = "2.2.3"
     }
     random = {
-      source = "hashicorp/random"
+      source  = "hashicorp/random"
       version = "3.5.1"
     }
   }
@@ -48,7 +48,7 @@ resource "proxmox_virtual_environment_file" "ignition" {
   }
 }
 
-resource "proxmox_virtual_environment_vm" "kubernetes_master_node" {
+resource "proxmox_virtual_environment_vm" "node" {
   for_each = {
     for n in var.nodes : n.name => n
   }
@@ -57,7 +57,8 @@ resource "proxmox_virtual_environment_vm" "kubernetes_master_node" {
   description = "Managed by Terraform"
   node_name   = var.pve_node_name
   vm_id       = each.value.vm_id
-  tags        = [
+
+  tags = [
     "terraform",
     "flatcar",
     "kubernetes"
@@ -67,7 +68,7 @@ resource "proxmox_virtual_environment_vm" "kubernetes_master_node" {
 
   # Very annoyingly, this can only be executed with *the* root account as of PX 8.1.3
   kvm_arguments = "-fw_cfg name=opt/com.coreos/config,file=${var.pve_snippets_pwd}/${proxmox_virtual_environment_file.ignition[each.value.name].file_name}"
-  
+
   # Flatcar has the qemu-guest-package installed already
   agent {
     enabled = true

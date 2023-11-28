@@ -46,7 +46,7 @@ data "ignition_user" "ansible" {
   home_dir = "/home/ansible/"
   shell    = "/bin/bash"
   system   = true
-  groups   = [ "sudo" ]
+  groups   = ["sudo"]
 
   password_hash = random_password.password.bcrypt_hash
 
