@@ -1,3 +1,8 @@
+# User stuff
+secret*
+secret*/**
+*.ign
+
 # Local .terraform directories
 **/.terraform/*
 
