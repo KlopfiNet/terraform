@@ -32,9 +32,7 @@ resource "proxmox_virtual_environment_file" "flatcar_image" {
 }
 
 resource "proxmox_virtual_environment_file" "ignition" {
-  for_each = {
-    for n in var.nodes : n.name => n
-  }
+  for_each = { for n in var.nodes : n.name => n }
 
   depends_on = [data.ignition_config.base]
 
@@ -49,9 +47,7 @@ resource "proxmox_virtual_environment_file" "ignition" {
 }
 
 resource "proxmox_virtual_environment_vm" "node" {
-  for_each = {
-    for n in var.nodes : n.name => n
-  }
+  for_each = { for n in var.nodes : n.name => n }
 
   name        = each.value.name
   description = "Managed by Terraform"
