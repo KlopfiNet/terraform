@@ -7,11 +7,6 @@ terraform {
   }
 }
 
-provider "vault" {
-  address = "http://10.0.1.152:8200"
-  #token = VAULT_TOKEN ENV VAR
-}
-
 provider "proxmox" {
   endpoint = "https://10.0.1.10:8006/"
   insecure = true
