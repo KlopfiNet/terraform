@@ -34,6 +34,12 @@ variable "lxc_ip_address" {
   }
 }
 
+variable "lxc_disk_size" {
+  description = "Disk size of the container."
+  type        = number
+  default     = 5
+}
+
 variable "lxc_template" {
   # See: http://download.proxmox.com/images/system/
   description = "Filename of the template as provided by proxmox repo."
@@ -43,7 +49,7 @@ variable "lxc_template" {
 variable "lxc_template_type" {
   description = "Type of the lxc template."
   type        = string
-  default     = "debain"
+  default     = "debian"
 }
 
 variable "lxc_ssh_key" {

@@ -8,8 +8,11 @@ terraform {
 }
 
 locals {
-  container_gateway_base       = join(".", slice(split(".", var.lxc_ip_address), 0, 3))
+  container_network_address = join(".", slice(split(".", var.lxc_ip_address), 0, 3))
+  # Last octet and . are removed, e.g.: 10.0.1.50 -> 10.0.1
+
   container_gateway_last_octet = 1
+  container_ipv4_cidr          = 24
 }
 
 resource "random_password" "container_password" {
@@ -19,7 +22,7 @@ resource "random_password" "container_password" {
 }
 
 resource "proxmox_virtual_environment_file" "lxc_template" {
-  content_type = "iso"
+  content_type = "vztmpl"
   datastore_id = var.pve_datastore_data
   node_name    = var.pve_node_name
 
@@ -30,8 +33,8 @@ resource "proxmox_virtual_environment_file" "lxc_template" {
 
 resource "proxmox_virtual_environment_container" "load_balancer" {
   description = "Managed by Terraform"
-  node_name = var.pve_node_name
-  vm_id     = var.lxc_vm_id
+  node_name   = var.pve_node_name
+  vm_id       = var.lxc_vm_id
 
   tags = [
     "debain",
@@ -44,8 +47,8 @@ resource "proxmox_virtual_environment_container" "load_balancer" {
 
     ip_config {
       ipv4 {
-        address = var.lxc_ip_address
-        gateway = "${local.container_gateway_base}.${local.container_gateway_last_octet}"
+        address = "${var.lxc_ip_address}/${local.container_ipv4_cidr}"
+        gateway = "${local.container_network_address}.${local.container_gateway_last_octet}"
       }
     }
 
@@ -62,6 +65,11 @@ resource "proxmox_virtual_environment_container" "load_balancer" {
   operating_system {
     template_file_id = proxmox_virtual_environment_file.lxc_template.id
     type             = var.lxc_template_type
+  }
+
+  disk {
+    datastore_id = var.pve_datastore_vm
+    size         = var.lxc_disk_size
   }
 
   memory {
