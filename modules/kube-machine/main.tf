@@ -55,9 +55,9 @@ resource "proxmox_virtual_environment_vm" "node" {
   vm_id       = each.value.vm_id
 
   tags = [
-    "terraform",
     "flatcar",
-    "kubernetes"
+    "kubernetes",
+    "terraform"
   ]
 
   keyboard_layout = "de-ch"
