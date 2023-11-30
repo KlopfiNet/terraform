@@ -1,0 +1,1 @@
+../../common/proxmox-config.tf

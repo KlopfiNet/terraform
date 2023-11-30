@@ -28,9 +28,15 @@ provider "proxmox" {
 }
 
 # -------------------------------------------
+locals {
+  ssh_pub = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGEch+fpr62X3Lb4qvEREysIHnhB6nrdZKbzWF/OSIri ansible"
+}
 
+# -------------------------------------------
+
+# Kuberenetes
 module "machine" {
-  source = "./modules/machine"
+  source = "./modules/kube-machine"
 
   // Vars here
   nodes = [
@@ -54,4 +60,17 @@ module "machine" {
   node_cpu_sockets = 1
   node_cpu_cores   = 1
   node_memory      = 3072
+  node_ssh_key     = local.ssh_pub
+}
+
+# Load balancer
+module "load-balancer" {
+  source = "./modules/load-balancer"
+
+  lxc_cpu_cores  = 1
+  lxc_memory     = 512
+  lxc_ip_address = "10.0.1.84"
+  lxc_template   = "debian-12-standard_12.2-1_amd64.tar.zst"
+  lxc_ssh_key    = local.ssh_pub
+  lxc_vm_id      = 300
 }
