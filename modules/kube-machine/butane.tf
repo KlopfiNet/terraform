@@ -101,7 +101,7 @@ data "ignition_file" "network" {
     Name=eth0
 
     [Network]
-    DNS=${local.ip_network}.1
+    DNS=${local.ip_network}.20
     Address=${local.ip_network}.${each.value.ip_octet}/24
     Gateway=${local.ip_network}.1
     EOT
