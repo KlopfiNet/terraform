@@ -1,13 +1,13 @@
 [master]
 %{ for host in hosts ~}
 %{ if host.master == true ~}
-${ip_network}.${host.ip_octet}
+${host.name} ansible_host=${ip_network}.${host.ip_octet}
 %{ endif ~}
 %{ endfor ~}
 
 [worker]
 %{ for host in hosts ~}
 %{ if host.master != true ~}
-${ip_network}.${host.ip_octet}
+${host.name} ansible_host=${ip_network}.${host.ip_octet}
 %{ endif ~}
 %{ endfor ~}

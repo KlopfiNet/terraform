@@ -1,7 +1,7 @@
 [master]
-10.0.1.80
-10.0.1.81
-10.0.1.82
+kubernetes-master-01 ansible_host=10.0.1.80
+kubernetes-master-02 ansible_host=10.0.1.81
+kubernetes-master-03 ansible_host=10.0.1.82
 
 [worker]
-10.0.1.85
+kubernetes-worker-01 ansible_host=10.0.1.85
