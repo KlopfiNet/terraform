@@ -70,30 +70,7 @@ data "ignition_systemd_unit" "sysupdate-service" {
       ExecStartPost=/usr/bin/sh -c "[[ \$(cat /tmp/kubernetes) != \$(cat /tmp/kubernetes-new) ]] && touch /run/reboot-required"
     EOT
   }
-  # error at $.contents: invalid unit content: found garbage after section name : "] && touch /run/reboot-required\""
 }
-
-/*
-# The following service may only run on one control plane node
-data "ignition_systemd_unit" "kubeadm-service-initial" {
-  name    = "kubeadm.service"
-  enabled = true
-  content = <<-EOT
-  [Unit]
-  Description=Kubeadm service
-  Requires=containerd.service
-  After=containerd.service
-  ConditionPathExists=!/etc/kubernetes/kubelet.conf
-  [Service]
-  ExecStartPre=/usr/bin/kubeadm init
-  ExecStartPre=/usr/bin/mkdir /home/core/.kube
-  ExecStartPre=/usr/bin/cp /etc/kubernetes/admin.conf /home/core/.kube/config
-  ExecStart=/usr/bin/chown -R core:core /home/core/.kube
-  [Install]
-  WantedBy=multi-user.target
-  EOT
-}
-*/
 
 # -----------------------------------------
 
@@ -124,9 +101,9 @@ data "ignition_file" "network" {
     Name=eth0
 
     [Network]
-    DNS=10.0.1.1
-    Address=10.0.1.${each.value.ip_octet}/24
-    Gateway=10.0.1.1
+    DNS=${local.ip_network}.1
+    Address=${local.ip_network}.${each.value.ip_octet}/24
+    Gateway=${local.ip_network}.1
     EOT
   }
 }
@@ -143,12 +120,16 @@ data "ignition_config" "base" {
     data.ignition_file.network[each.value.name].rendered,
 
     # Common files
+    /*
     data.ignition_file.kubernetes-conf.rendered,
     data.ignition_file.kubernetes-sysext.rendered,
     data.ignition_file.noop-conf.rendered
+    */
   ]
 
   links = [data.ignition_link.kubernetes-sysext.rendered]
+
+  /*
   systemd = [
     data.ignition_systemd_unit.sysupdate-timer.rendered,
     data.ignition_systemd_unit.sysupdate-service.rendered,
@@ -156,4 +137,5 @@ data "ignition_config" "base" {
     # Only execute on initial node!
     #data.ignition_systemd_unit.kubeadm-service-initial.rendered
   ]
+  */
 }
