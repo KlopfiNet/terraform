@@ -4,5 +4,5 @@ resource "local_file" "ansible_inventory" {
     hosts      = var.nodes
     ip_network = local.ip_network
   })
-  filename = "./outputs/inventory_kubernetes"
+  filename = "./outputs/inventory_kubernetes.ini"
 }
