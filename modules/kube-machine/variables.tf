@@ -3,7 +3,8 @@ variable "nodes" {
   type = list(object({
     name     = string,
     ip_octet = number,
-    vm_id    = number
+    vm_id    = number,
+    master   = bool,
   }))
 
   // Validate that name is unique
@@ -25,9 +26,9 @@ variable "nodes" {
     error_message = "The VM vm_id must be a number between 900 and 1000."
   }
 
-  // Validate that the list has an uneven amount of entries (etcd)
+  // Validate that the list has an uneven amount of masters (etcd)
   validation {
-    condition     = length(var.nodes) % 2 == 1
+    condition     = length([for obj in var.nodes : obj.master if obj.master]) % 2 == 1
     error_message = "Must provide an uneven amount of nodes"
   }
 }

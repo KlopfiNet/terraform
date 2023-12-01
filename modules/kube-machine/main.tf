@@ -57,6 +57,7 @@ resource "proxmox_virtual_environment_vm" "node" {
   tags = [
     "flatcar",
     "kubernetes",
+    each.value.master ? "master" : "worker",
     "terraform"
   ]
 
