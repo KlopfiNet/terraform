@@ -29,6 +29,28 @@ provider "proxmox" {
 
 # -------------------------------------------
 
+terraform {
+  backend "s3" {
+    bucket = "terraform"
+    key    = "klopfi-net.tfstate"
+
+    # Irrelevant but required
+    region = "main"
+
+    endpoints = { s3 = "https://minio.klopfi.net:9000" }
+
+    # All required for custom S3
+    skip_credentials_validation = true
+    skip_requesting_account_id  = true
+    skip_metadata_api_check     = true
+    skip_region_validation      = true
+
+    use_path_style = true
+  }
+}
+
+# -------------------------------------------
+
 locals {
   ssh_pub = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGEch+fpr62X3Lb4qvEREysIHnhB6nrdZKbzWF/OSIri ansible"
 }

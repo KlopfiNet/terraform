@@ -2,6 +2,7 @@
 secret*
 secret*/**
 *.ign
+backend.conf
 
 # Local .terraform directories
 **/.terraform/*
