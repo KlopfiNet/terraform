@@ -80,4 +80,11 @@ resource "proxmox_virtual_environment_container" "load_balancer" {
     cores = var.lxc_cpu_cores
     units = var.lxc_cpu_units
   }
+
+  lifecycle {
+    ignore_changes = [
+      description
+      # Will always trigger changes
+    ]
+  }
 }
