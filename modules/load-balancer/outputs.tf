@@ -1,3 +1,3 @@
-output "container_password" {
-  value = random_password.container_password.result
+output "vm_password" {
+  value = random_password.vm_password.result
 }

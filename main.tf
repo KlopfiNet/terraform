@@ -99,12 +99,11 @@ module "kube-machine" {
 module "load-balancer" {
   source = "./modules/load-balancer"
 
-  lxc_cpu_cores  = 1
-  lxc_memory     = 512
-  lxc_ip_address = "10.0.1.84"
-  lxc_template   = "debian-12-standard_12.2-1_amd64.tar.zst"
-  lxc_ssh_key    = local.ssh_pub
-  lxc_vm_id      = 300
+  vm_cpu_cores  = 1
+  vm_memory     = 512
+  vm_ip_address = "10.0.1.84"
+  vm_ssh_key    = local.ssh_pub
+  vm_id         = 300
 }
 
 # -------------------------------------------

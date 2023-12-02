@@ -1,58 +1,53 @@
-variable "lxc_memory" {
-  description = "Amount of memory to allocate for container. Provide in sizes of 1024."
+variable "vm_memory" {
+  description = "Amount of memory to allocate for vm. Provide in sizes of 1024."
   type        = number
 
   validation {
-    condition     = var.lxc_memory >= 512
+    condition     = var.vm_memory >= 512
     error_message = "Must provide at least 512MB of memory"
   }
 }
 
-variable "lxc_cpu_cores" {
-  description = "Amount of CPU cores to allocate for container."
+variable "vm_cpu_cores" {
+  description = "Amount of CPU cores to allocate for vm."
   type        = number
 }
 
-variable "lxc_cpu_units" {
-  description = "Amount of CPU units to allocate for container."
+variable "vm_cpu_sockets" {
+  description = "Amount of CPU sockets to allocate for vm."
   type        = number
-  default     = 1024
+  default     = 1
 }
 
-variable "lxc_vm_id" {
-  description = "ID of container."
+variable "vm_id" {
+  description = "ID of vm."
   type        = number
 }
 
-variable "lxc_ip_address" {
-  description = "IPv4 address of the container."
+variable "vm_ip_address" {
+  description = "IPv4 address of the vm."
   type        = string
 
   validation {
-    condition     = can(regex("^\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b$", var.lxc_ip_address))
+    condition     = can(regex("^\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b$", var.vm_ip_address))
     error_message = "Invalid IP address format. Please provide a valid IPv4 address."
   }
 }
 
-variable "lxc_disk_size" {
-  description = "Disk size of the container."
+variable "vm_disk_size" {
+  description = "Disk size of the vm."
   type        = number
-  default     = 5
+  default     = 10
 }
 
-variable "lxc_template" {
-  # See: http://download.proxmox.com/images/system/
-  description = "Filename of the template as provided by proxmox repo."
-  type        = string
-}
-
-variable "lxc_template_type" {
-  description = "Type of the lxc template."
-  type        = string
-  default     = "debian"
-}
-
-variable "lxc_ssh_key" {
+variable "vm_ssh_key" {
   description = "SSH pub of key to use for user account."
   type        = string
+}
+
+variable "vm_image_url" {
+  description = "URL of VM image."
+  type        = string
+  default     = "https://cloud.debian.org/images/cloud/bookworm/latest/debian-12-genericcloud-amd64.qcow2"
+  #default     = "https://cloud-images.ubuntu.com/releases/22.04/release/ubuntu-22.04-server-cloudimg-amd64.img"
 }
