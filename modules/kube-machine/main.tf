@@ -61,7 +61,7 @@ resource "proxmox_virtual_environment_vm" "node" {
   vm_id       = each.value.vm_id
 
   tags = [
-    "flatcar",
+    "debian",
     "kubernetes",
     each.value.master ? "master" : "worker",
     "terraform"
@@ -101,8 +101,8 @@ resource "proxmox_virtual_environment_vm" "node" {
 
   startup {
     order      = "3"
-    up_delay   = "60"
-    down_delay = "60"
+    up_delay   = "0"
+    down_delay = "10"
   }
 
   disk {
@@ -115,6 +115,8 @@ resource "proxmox_virtual_environment_vm" "node" {
     #  qemu-img: Use the --shrink option to perform a shrink operation.
     #  qemu-img: warning: Shrinking an image will delete all data beyond the shrunken image's end. Before performing such an operation, make sure there is no important data there.
   }
+
+  timeout_create = "2400"
 
   network_device {
     bridge = "vmbr0"
