@@ -86,6 +86,12 @@ module "kube-machine" {
       ip_octet = 85
       vm_id    = 910
       master   = false
+    },
+    {
+      name     = "kubernetes-worker-02"
+      ip_octet = 86
+      vm_id    = 911
+      master   = false
     }
   ]
 
