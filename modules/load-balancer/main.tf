@@ -29,9 +29,9 @@ resource "proxmox_virtual_environment_file" "cloud_config" {
 
   source_raw {
     data = templatefile("${path.module}/templates/cloud_config.tmpl", {
-      ssh_key    = var.vm_ssh_key
-      hostname   = local.vm_name
-      password   = random_password.vm_password.result
+      ssh_key  = var.vm_ssh_key
+      hostname = local.vm_name
+      password = random_password.vm_password.result
     })
 
     file_name = "cloud_config-${var.vm_id}.yaml"
@@ -71,20 +71,19 @@ resource "proxmox_virtual_environment_vm" "load_balancer" {
 
   initialization {
     user_data_file_id = proxmox_virtual_environment_file.cloud_config.id
-    
+
     ip_config {
+      # Somehow cannot be set in cloud-init file
       ipv4 {
         address = "${var.vm_ip_address}/${local.vm_ipv4_cidr}"
         gateway = "${local.vm_network_address}.${local.vm_gateway_last_octet}"
       }
     }
 
-    /*
-    user_account {
-      keys     = [trimspace(var.vm_ssh_key)]
-      password = random_password.vm_password.result
-      username = "ansible"
-    }*/
+    dns {
+      server = "${local.vm_network_address}.20"
+      domain = "klopfi.net"
+    }
   }
 
   cpu {

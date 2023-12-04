@@ -20,7 +20,7 @@ pve_password = ""
 
 Initialize:
 ```bash
-terraform init -backend-config=backend.conf
+terraform init #-backend-config=backend.conf
 ```
 
 (Optional) Prepare a few env vars:

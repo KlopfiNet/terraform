@@ -10,10 +10,6 @@ terraform {
       source  = "bpg/proxmox"
       version = "0.38.1"
     }
-    ignition = {
-      source  = "community-terraform-providers/ignition"
-      version = "2.2.3"
-    }
     random = {
       source  = "hashicorp/random"
       version = "3.5.1"
@@ -21,28 +17,38 @@ terraform {
   }
 }
 
-resource "proxmox_virtual_environment_file" "flatcar_image" {
+resource "random_password" "password" {
+  length           = 16
+  override_special = "_%@"
+  special          = true
+}
+
+resource "proxmox_virtual_environment_file" "os_image" {
   content_type = "iso"
   datastore_id = var.pve_datastore_data
   node_name    = var.pve_node_name
 
   source_file {
-    path = "https://stable.release.flatcar-linux.net/amd64-usr/current/flatcar_production_qemu_image.img"
+    path      = var.vm_image_url
+    file_name = replace(basename(var.vm_image_url), "qcow2", "img")
   }
 }
 
-resource "proxmox_virtual_environment_file" "ignition" {
+resource "proxmox_virtual_environment_file" "provision_file" {
   for_each = { for n in var.nodes : n.name => n }
-
-  depends_on = [data.ignition_config.base]
 
   content_type = "snippets"
   datastore_id = var.pve_datastore_data
   node_name    = var.pve_node_name
 
   source_raw {
-    data      = data.ignition_config.base[each.value.name].rendered
-    file_name = "machine-transpiled-${each.value.vm_id}.ign"
+    data = templatefile("${path.module}/templates/cloud_config.tmpl", {
+      ssh_key  = var.node_ssh_key
+      hostname = each.value.name
+      password = random_password.password.result
+    })
+
+    file_name = "cloud_config-${each.value.vm_id}.yaml"
   }
 }
 
@@ -63,12 +69,25 @@ resource "proxmox_virtual_environment_vm" "node" {
 
   keyboard_layout = "de-ch"
 
-  # Very annoyingly, this can only be executed with *the* root account as of PX 8.1.3
-  kvm_arguments = "-fw_cfg name=opt/com.coreos/config,file=${var.pve_snippets_pwd}/${proxmox_virtual_environment_file.ignition[each.value.name].file_name}"
-
-  # Flatcar has the qemu-guest-package installed already
   agent {
-    enabled = true
+    enabled = false
+  }
+
+  initialization {
+    user_data_file_id = proxmox_virtual_environment_file.provision_file[each.value.name].id
+
+    ip_config {
+      # Somehow cannot be set in cloud-init file
+      ipv4 {
+        address = "${local.ip_network}.${each.value.ip_octet}/24"
+        gateway = "${local.ip_network}.1"
+      }
+    }
+
+    dns {
+      server = "${local.ip_network}.20"
+      domain = "klopfi.net"
+    }
   }
 
   cpu {
@@ -77,7 +96,6 @@ resource "proxmox_virtual_environment_vm" "node" {
   }
 
   memory {
-    // Flatcar requires at least 3GB
     dedicated = var.node_memory
   }
 
@@ -89,7 +107,7 @@ resource "proxmox_virtual_environment_vm" "node" {
 
   disk {
     datastore_id = var.pve_datastore_vm
-    file_id      = proxmox_virtual_environment_file.flatcar_image.id
+    file_id      = proxmox_virtual_environment_file.os_image.id
     interface    = "scsi0"
 
     size = "20"
