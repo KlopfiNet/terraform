@@ -9,6 +9,11 @@ Set S3 env vars, or store in `secret.env`:
 export AWS_ACCESS_KEY_ID=""
 export AWS_SECRET_ACCESS_KEY=""
 
+# Keyname should be fully qualified, therefore <name>. (dot at end)
+export DNS_UPDATE_KEYNAME=""
+export DNS_UPDATE_KEYSECRET=$(echo "weAreTheWorld55" | base64) # <- must be base64 encoded
+export DNS_UPDATE_KEYALGORITHM="hmac-sha256"
+
 # If stored in secret.env
 set -o allexport && source secret.env && set +o allexport
 ```
