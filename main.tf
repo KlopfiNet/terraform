@@ -104,7 +104,7 @@ module "kube-machine" {
   node_worker_cpu_cores   = 2
   node_worker_memory      = 6144
 
-  node_ssh_key     = local.ssh_pub
+  node_ssh_key = local.ssh_pub
 }
 
 # Load balancer

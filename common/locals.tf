@@ -1,5 +1,5 @@
 locals {
   # Only populate first 3 octets, leaving no trailing dot
   ip_network = "10.0.1"
-  dns_zone = "klopfi.net"
+  dns_zone   = "klopfi.net"
 }
