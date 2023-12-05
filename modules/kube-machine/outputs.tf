@@ -1,4 +1,4 @@
-output "butane_ansible_password" {
+output "ansible_password" {
   value     = random_password.password.result
   sensitive = true
 }
