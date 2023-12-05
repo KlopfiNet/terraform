@@ -95,9 +95,15 @@ module "kube-machine" {
     }
   ]
 
-  node_cpu_sockets = 1
-  node_cpu_cores   = 1
-  node_memory      = 3072
+  // Node sizing
+  node_master_cpu_sockets = 1
+  node_master_cpu_cores   = 1
+  node_master_memory      = 3072
+
+  node_worker_cpu_sockets = 1
+  node_worker_cpu_cores   = 2
+  node_worker_memory      = 6144
+
   node_ssh_key     = local.ssh_pub
 }
 

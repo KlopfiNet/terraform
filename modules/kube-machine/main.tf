@@ -95,12 +95,12 @@ resource "proxmox_virtual_environment_vm" "node" {
   }
 
   cpu {
-    cores   = var.node_cpu_cores
-    sockets = var.node_cpu_sockets
+    cores   = each.value.master ? var.node_master_cpu_cores : var.node_worker_cpu_cores
+    sockets = each.value.master ? var.node_master_cpu_sockets : var.node_worker_cpu_sockets
   }
 
   memory {
-    dedicated = var.node_memory
+    dedicated = each.value.master ? var.node_master_memory : var.node_worker_memory
   }
 
   startup {

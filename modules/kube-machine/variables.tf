@@ -33,35 +33,53 @@ variable "nodes" {
   }
 }
 
-variable "node_memory" {
-  description = "Amount of memory to allocate for EACH node. Provide in sizes of 1024."
+// ------------ MASTER
+variable "node_master_memory" {
+  description = "Amount of memory to allocate for master nodes. Provide in sizes of 1024."
   type        = number
 
   validation {
-    condition     = var.node_memory >= 3072
+    condition     = var.node_master_memory >= 3072
     error_message = "Must provide at least 3GB (3072MB) of memory"
   }
 }
 
-variable "node_cpu_cores" {
-  description = "Amount of CPU cores to allocate for EACH node."
+variable "node_master_cpu_cores" {
+  description = "Amount of CPU cores to allocate for master nodes."
   type        = number
 }
 
-variable "node_cpu_sockets" {
-  description = "Amount of CPU sockets to allocate for EACH node."
+variable "node_master_cpu_sockets" {
+  description = "Amount of CPU sockets to allocate for master nodes."
   type        = number
 }
+
+// ------------ WORKER
+variable "node_worker_memory" {
+  description = "Amount of memory to allocate for worker nodes. Provide in sizes of 1024."
+  type        = number
+
+  validation {
+    condition     = var.node_worker_memory >= 3072
+    error_message = "Must provide at least 3GB (3072MB) of memory"
+  }
+}
+
+variable "node_worker_cpu_cores" {
+  description = "Amount of CPU cores to allocate for worker nodes."
+  type        = number
+}
+
+variable "node_worker_cpu_sockets" {
+  description = "Amount of CPU sockets to allocate for worker nodes."
+  type        = number
+}
+
+// ---------------------------
 
 variable "node_ssh_key" {
   description = "SSH pub of key to use for user account."
   type        = string
-}
-
-variable "kubernetes_version" {
-  description = "Kubernetes version"
-  type        = string
-  default     = "v1.27.4"
 }
 
 variable "vm_image_url" {
