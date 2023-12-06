@@ -97,8 +97,8 @@ module "kube-machine" {
 
   // Node sizing
   node_master_cpu_sockets = 1
-  node_master_cpu_cores   = 1
-  node_master_memory      = 3072
+  node_master_cpu_cores   = 2
+  node_master_memory      = 4096
 
   node_worker_cpu_sockets = 1
   node_worker_cpu_cores   = 2
