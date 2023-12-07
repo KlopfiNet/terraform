@@ -56,6 +56,13 @@ locals {
 }
 
 # -------------------------------------------
+# MODULES
+
+# MinIO
+module "minio" {
+  source = "./modules/minio"
+  # For credentials, set env vars: MINIO_USER, SECOND_MINIO_PASSWORD
+}
 
 # Kuberenetes
 module "kube-machine" {
@@ -127,5 +134,10 @@ output "kube-machine" {
 
 output "load-balancer" {
   value     = module.load-balancer
+  sensitive = true
+}
+
+output "minio" {
+  value     = module.minio
   sensitive = true
 }

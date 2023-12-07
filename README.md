@@ -11,8 +11,11 @@ export AWS_SECRET_ACCESS_KEY=""
 
 # Keyname should be fully qualified, therefore <name>. (dot at end)
 export DNS_UPDATE_KEYNAME=""
-export DNS_UPDATE_KEYSECRET=$(echo "weAreTheWorld55" | base64) # <- must be base64 encoded
+export DNS_UPDATE_KEYSECRET=$(echo "..." | base64) # <- must be base64 encoded
 export DNS_UPDATE_KEYALGORITHM="hmac-sha256"
+
+export MINIO_USER=""
+export MINIO_PASSWORD=""
 
 # If stored in secret.env
 set -o allexport && source secret.env && set +o allexport
