@@ -11,3 +11,7 @@ ${host.name} ansible_host=${ip_network}.${host.ip_octet}
 ${host.name} ansible_host=${ip_network}.${host.ip_octet}
 %{ endif ~}
 %{ endfor ~}
+
+[cluster:children]
+master
+worker
