@@ -60,15 +60,19 @@ locals {
 
 # MinIO
 module "minio" {
-  source = "./modules/minio"
   # For credentials, set env vars: MINIO_USER, SECOND_MINIO_PASSWORD
+  source = "./modules/minio"
+
+  buckets = [
+    "velero",
+    "kubernetes"
+  ]
 }
 
 # Kuberenetes
 module "kube-machine" {
   source = "./modules/kube-machine"
 
-  // Vars here
   nodes = [
     {
       name     = "kubernetes-master-01"
@@ -102,7 +106,7 @@ module "kube-machine" {
     }
   ]
 
-  // Node sizing
+  # Node sizing
   node_master_cpu_sockets = 1
   node_master_cpu_cores   = 2
   node_master_memory      = 4096
