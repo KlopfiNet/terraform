@@ -1,9 +1,3 @@
-/*
-data "vault_generic_secret" "pm_terraform_host_ssh_pub" {
-  path = "secret/proxmox/server_pub_key"
-}
-*/
-
 terraform {
   required_providers {
     proxmox = {
@@ -64,12 +58,12 @@ resource "proxmox_virtual_environment_vm" "node" {
   node_name   = var.pve_node_name
   vm_id       = each.value.vm_id
 
-  tags = [
+  tags = sort([
     "debian",
     "kubernetes",
-    each.value.master ? "master" : "worker",
+    each.value.role,
     "terraform"
-  ]
+  ])
 
   keyboard_layout = "de-ch"
 
@@ -95,12 +89,12 @@ resource "proxmox_virtual_environment_vm" "node" {
   }
 
   cpu {
-    cores   = each.value.master ? var.node_master_cpu_cores : var.node_worker_cpu_cores
-    sockets = each.value.master ? var.node_master_cpu_sockets : var.node_worker_cpu_sockets
+    cores   = (each.value.role == "master") ? var.node_master_cpu_cores : var.node_worker_cpu_cores
+    sockets = (each.value.role == "master") ? var.node_master_cpu_sockets : var.node_worker_cpu_sockets
   }
 
   memory {
-    dedicated = each.value.master ? var.node_master_memory : var.node_worker_memory
+    dedicated = (each.value.role == "master") ? var.node_master_memory : var.node_worker_memory
   }
 
   startup {
