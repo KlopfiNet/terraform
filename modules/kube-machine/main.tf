@@ -145,6 +145,7 @@ resource "proxmox_virtual_environment_vm" "node" {
 }
 
 // Touch sentinel file on specific resource changes
+/*
 resource "terraform_data" "sentinel_trigger" {
   for_each = { for n in var.nodes : n.name => n }
 
@@ -164,3 +165,4 @@ resource "terraform_data" "sentinel_trigger" {
     inline = ["sudo touch /var/run/reboot-required"]
   }
 }
+*/
