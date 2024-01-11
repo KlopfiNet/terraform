@@ -1,17 +1,13 @@
-[master]
+%{ for role in distinct([for h in hosts : h.role]) ~}
+[${ role }]
 %{ for host in hosts ~}
-%{ if host.master == true ~}
+%{ if host.role == role ~}
 ${host.name} ansible_host=${ip_network}.${host.ip_octet}
 %{ endif ~}
 %{ endfor ~}
-
-[worker]
-%{ for host in hosts ~}
-%{ if host.master != true ~}
-${host.name} ansible_host=${ip_network}.${host.ip_octet}
-%{ endif ~}
 %{ endfor ~}
 
 [cluster:children]
-master
-worker
+%{ for role in distinct([for h in hosts : h.role]) ~}
+${ role }
+%{ endfor ~}
