@@ -1,9 +1,3 @@
-/*
-data "vault_generic_secret" "pm_terraform_host_ssh_pub" {
-  path = "secret/proxmox/server_pub_key"
-}
-*/
-
 terraform {
   required_providers {
     proxmox = {
@@ -17,6 +11,24 @@ terraform {
     dns = {
       source  = "hashicorp/dns"
       version = "3.3.2"
+    }
+  }
+}
+
+locals {
+  vm_resources = {
+    "master" = {
+      sockets = var.node_master_cpu_sockets,
+      cpu     = var.node_master_cpu_cores,
+      memory  = var.node_master_memory
+      }, "worker" = {
+      sockets = var.node_worker_cpu_sockets,
+      cpu     = var.node_worker_cpu_cores,
+      memory  = var.node_worker_memory
+      }, "infra" = {
+      sockets = var.node_infra_cpu_sockets,
+      cpu     = var.node_infra_cpu_cores,
+      memory  = var.node_infra_memory
     }
   }
 }
@@ -64,12 +76,12 @@ resource "proxmox_virtual_environment_vm" "node" {
   node_name   = var.pve_node_name
   vm_id       = each.value.vm_id
 
-  tags = [
+  tags = sort([
     "debian",
     "kubernetes",
-    each.value.master ? "master" : "worker",
+    each.value.role,
     "terraform"
-  ]
+  ])
 
   keyboard_layout = "de-ch"
 
@@ -95,12 +107,12 @@ resource "proxmox_virtual_environment_vm" "node" {
   }
 
   cpu {
-    cores   = each.value.master ? var.node_master_cpu_cores : var.node_worker_cpu_cores
-    sockets = each.value.master ? var.node_master_cpu_sockets : var.node_worker_cpu_sockets
+    cores   = local.vm_resources[each.value.role].cpu
+    sockets = local.vm_resources[each.value.role].sockets
   }
 
   memory {
-    dedicated = each.value.master ? var.node_master_memory : var.node_worker_memory
+    dedicated = local.vm_resources[each.value.role].memory
   }
 
   startup {
@@ -133,6 +145,7 @@ resource "proxmox_virtual_environment_vm" "node" {
 }
 
 // Touch sentinel file on specific resource changes
+/*
 resource "terraform_data" "sentinel_trigger" {
   for_each = { for n in var.nodes : n.name => n }
 
@@ -152,3 +165,4 @@ resource "terraform_data" "sentinel_trigger" {
     inline = ["sudo touch /var/run/reboot-required"]
   }
 }
+*/

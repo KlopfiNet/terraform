@@ -78,31 +78,37 @@ module "kube-machine" {
       name     = "kubernetes-master-01"
       ip_octet = 80
       vm_id    = 900
-      master   = true
+      role     = "master"
     },
     {
       name     = "kubernetes-master-02"
       ip_octet = 81
       vm_id    = 901
-      master   = true
+      role     = "master"
     },
     {
       name     = "kubernetes-master-03"
       ip_octet = 82
       vm_id    = 902
-      master   = true
+      role     = "master"
     },
     {
       name     = "kubernetes-worker-01"
       ip_octet = 85
       vm_id    = 910
-      master   = false
+      role     = "worker"
     },
     {
       name     = "kubernetes-worker-02"
       ip_octet = 86
       vm_id    = 911
-      master   = false
+      role     = "worker"
+    },
+    {
+      name     = "kubernetes-infra-01"
+      ip_octet = 90
+      vm_id    = 920
+      role     = "infra"
     }
   ]
 
@@ -114,6 +120,10 @@ module "kube-machine" {
   node_worker_cpu_sockets = 1
   node_worker_cpu_cores   = 2
   node_worker_memory      = 7168
+
+  node_infra_cpu_sockets = 1
+  node_infra_cpu_cores   = 2
+  node_infra_memory      = 7168
 
   node_ssh_key = local.ssh_pub
 }
