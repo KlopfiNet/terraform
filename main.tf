@@ -103,6 +103,12 @@ module "kube-machine" {
       ip_octet = 86
       vm_id    = 911
       role     = "worker"
+    },
+    {
+      name     = "kubernetes-infra-01"
+      ip_octet = 90
+      vm_id    = 920
+      role     = "infra"
     }
   ]
 
