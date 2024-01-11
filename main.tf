@@ -5,6 +5,8 @@ terraform {
       version = "0.38.1"
     }
   }
+
+  required_version = ">= 1.6"
 }
 
 provider "proxmox" {
@@ -12,16 +14,16 @@ provider "proxmox" {
   insecure = true
   tmp_dir  = "/var/tmp"
 
-  // Expected format: <user>@<node>!<token_name>=<token_secret>
-  // Does not work for kvm_args because bullshit
-  //api_token = "${data.vault_generic_secret.pm_api_token_id.data["value"]}=${data.vault_generic_secret.pm_api_token_secret.data["value"]}"
+  # Expected format: <user>@<node>!<token_name>=<token_secret>
+  # Does not work for kvm_args because bullshit
+  #api_token = "${data.vault_generic_secret.pm_api_token_id.data["value"]}=${data.vault_generic_secret.pm_api_token_secret.data["value"]}"
 
-  // This is required, see above
+  # This is required, see above
   username = "${var.pve_user}@pam"
   password = var.pve_password
 
   ssh {
-    // Required for certain actions that are not possible with just the API alone
+    # Required for certain actions that are not possible with just the API alone
     username = var.pve_user
     agent    = true
   }
@@ -70,8 +72,8 @@ module "minio" {
 }
 
 # Kuberenetes
-module "kube-machine" {
-  source = "./modules/kube-machine"
+module "kube_machine" {
+  source = "./modules/kube_machine"
 
   nodes = [
     {
@@ -129,8 +131,8 @@ module "kube-machine" {
 }
 
 # Load balancer
-module "load-balancer" {
-  source = "./modules/load-balancer"
+module "load_balancer" {
+  source = "./modules/load_balancer"
 
   vm_cpu_cores  = 1
   vm_memory     = 512
@@ -141,13 +143,13 @@ module "load-balancer" {
 
 # -------------------------------------------
 
-output "kube-machine" {
-  value     = module.kube-machine
+output "kube_machine" {
+  value     = module.kube_machine
   sensitive = true
 }
 
-output "load-balancer" {
-  value     = module.load-balancer
+output "load_balancer" {
+  value     = module.load_balancer
   sensitive = true
 }
 
