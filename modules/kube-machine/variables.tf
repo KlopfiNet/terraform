@@ -94,6 +94,27 @@ variable "node_worker_cpu_sockets" {
   type        = number
 }
 
+// ------------ INFRA
+variable "node_infra_memory" {
+  description = "Amount of memory to allocate for infra nodes. Provide in sizes of 1024."
+  type        = number
+
+  validation {
+    condition     = var.node_infra_memory >= 3072
+    error_message = "Must provide at least 3GB (3072MB) of memory"
+  }
+}
+
+variable "node_infra_cpu_cores" {
+  description = "Amount of CPU cores to allocate for infra nodes."
+  type        = number
+}
+
+variable "node_infra_cpu_sockets" {
+  description = "Amount of CPU sockets to allocate for infra nodes."
+  type        = number
+}
+
 // ---------------------------
 
 variable "node_ssh_key" {

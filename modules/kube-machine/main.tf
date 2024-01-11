@@ -15,6 +15,24 @@ terraform {
   }
 }
 
+locals {
+  vm_resources = {
+    "master" = {
+      sockets = var.node_master_cpu_sockets,
+      cpu     = var.node_master_cpu_cores,
+      memory  = var.node_master_memory
+      }, "worker" = {
+      sockets = var.node_worker_cpu_sockets,
+      cpu     = var.node_worker_cpu_cores,
+      memory  = var.node_worker_memory
+      }, "infra" = {
+      sockets = var.node_infra_cpu_sockets,
+      cpu     = var.node_infra_cpu_cores,
+      memory  = var.node_infra_memory
+    }
+  }
+}
+
 resource "random_password" "password" {
   length           = 16
   override_special = "_%@"
@@ -89,12 +107,12 @@ resource "proxmox_virtual_environment_vm" "node" {
   }
 
   cpu {
-    cores   = (each.value.role == "master") ? var.node_master_cpu_cores : var.node_worker_cpu_cores
-    sockets = (each.value.role == "master") ? var.node_master_cpu_sockets : var.node_worker_cpu_sockets
+    cores   = local.vm_resources[each.value.role].cpu
+    sockets = local.vm_resources[each.value.role].sockets
   }
 
   memory {
-    dedicated = (each.value.role == "master") ? var.node_master_memory : var.node_worker_memory
+    dedicated = local.vm_resources[each.value.role].memory
   }
 
   startup {
