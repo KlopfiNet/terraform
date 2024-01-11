@@ -19,10 +19,16 @@ variable "nodes" {
     error_message = "The node ip_octet must be a number between 2 and 254."
   }
 
+  // Check that role is of an authorized list
+  validation {
+    condition     = alltrue([for node in var.nodes : contains(["master", "worker", "infra"], node.role)])
+    error_message = "Non-accepted machine role provided."
+  }
+
   // Validate that ip_octet is unique
   validation {
     condition     = length(var.nodes) == length(distinct([for n in var.nodes : n.ip_octet]))
-    error_message = "IP octet collision."
+    error_message = "IP (octet) collision."
   }
 
   // Validate VM vm_id
