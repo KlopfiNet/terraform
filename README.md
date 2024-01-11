@@ -37,3 +37,17 @@ export TF_LOG="" # Set to DEBUG if need be
 export VAULT_ADDR="http://10.0.1.152:8200"
 export VAULT_TOKEN="..."
 ```
+
+### Planning
+To apply or preview a plan, make use of the `Makefile`:
+```bash
+# Preview
+make plan
+
+# Apply WITHOUT confirmation
+make apply 
+```
+
+### New nodes
+To add new nodes, add them to `main.tf` in the root directory under `module "kube-machine"`.  
+Furhter sizing options can be conducted in there.
