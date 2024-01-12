@@ -3,7 +3,6 @@ on:
   push:
     branches: 
       - main
-      - feature/ci-inventory # debug
   pull_request:
   workflow_dispatch:
 
@@ -47,7 +46,7 @@ jobs:
       with:
         repository: "https://github.com/KlopfiNet/ansible.git"
         sparse-checkout: inventories
-        #ssh-key: ${{ secrets.KEY_KLOPFI_BOT }}
+        ssh-key: ${{ secrets.KEY_KLOPFI_BOT }}
 
     - name: Move new inventory
       if: steps.inventory-comparison.outputs.VERDICT == 'is_different'
