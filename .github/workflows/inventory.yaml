@@ -13,6 +13,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    - uses: hashicorp/setup-terraform@v3
 
     - uses: actions/cache@v3
       name: Restore cache
@@ -24,6 +25,9 @@ jobs:
     - name: Generate inventory
       id: generate-inventory
       run: ./ci/assemble_inventory.sh > ~/inventory
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.TF_STATE_BUCKET_ACC_KEY }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.TF_STATE_BUCKET_SEC_KEY }}
 
     - name: Compare inventories
       if: steps.inventory-cache-restore.outputs.cache-hit == 'true'
@@ -38,6 +42,7 @@ jobs:
       with:
         repository: "https://github.com/KlopfiNet/ansible.git"
         sparse-checkout: inventories
+        #ssh-key: ${{ secrets.KEY_KLOPFI_BOT }}
 
     - name: Move new inventory
       if: steps.inventory-comparison.outputs.VERDICT == 'is_different'
