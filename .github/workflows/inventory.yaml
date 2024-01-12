@@ -21,6 +21,9 @@ jobs:
         path: ~/inventory-restore
         key: inventory-terraform
 
+    - name: Terraform init
+      run: terraform init
+
     - name: Generate inventory
       id: generate-inventory
       run: ./ci/assemble_inventory.sh > ~/inventory
@@ -45,7 +48,7 @@ jobs:
 
     - name: Move new inventory
       if: steps.inventory-comparison.outputs.VERDICT == 'is_different'
-      run: cp ~/inventory ./ansible/inventories/inventory_all.ini
+      run: cp ~/inventory ./inventories/inventory_all.ini
 
     - uses: EndBug/add-and-commit@v9
       name: Update inventory in remote
