@@ -17,7 +17,7 @@ jobs:
 
     - name: Generate inventory
       id: generate-inventory
-      run: ./ci/assemble_inventory.sh > ~/inventory
+      run: ./ci/assemble_inventory.sh > /cache/current-inventory
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.TF_STATE_BUCKET_ACC_KEY }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.TF_STATE_BUCKET_SEC_KEY }}
@@ -45,7 +45,7 @@ jobs:
 
     - name: Move new inventory
       if: steps.inventory-comparison.outputs.VERDICT == 'is_different'
-      run: cp ~/inventory ./inventories/inventory_all.ini
+      run: cp /cache/current-inventory ./inventories/inventory_all.ini
 
     - uses: EndBug/add-and-commit@v9
       name: Update inventory in remote
@@ -60,4 +60,4 @@ jobs:
 
     - name: Cache new inventory
       id: cache-inventory-save
-      run: cp ~/inventory /cache/inventory-cache
+      run: cp /cache/current-inventory /cache/inventory-cache
