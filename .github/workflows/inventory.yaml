@@ -37,7 +37,7 @@ jobs:
       name: Check out ansible repo
       if: steps.inventory-comparison.outputs.VERDICT == 'is_different'
       with:
-        repository: "https://github.com/KlopfiNet/ansible.git"
+        repository: "KlopfiNet/ansible"
         sparse-checkout: inventories
         ssh-key: ${{ secrets.KEY_KLOPFI_BOT }}
 
