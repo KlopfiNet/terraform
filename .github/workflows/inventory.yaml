@@ -25,6 +25,9 @@ jobs:
         aws-region: us-east-1
         aws-s3-bucket-endpoint: false
         aws-s3-force-path-style: true
+      env:
+        NODE_OPTIONS: "--use-openssl"
+        # Required as node would use its own truststore
 
     - name: Terraform init
       run: terraform init
@@ -82,3 +85,5 @@ jobs:
         aws-region: us-east-1
         aws-s3-bucket-endpoint: false
         aws-s3-force-path-style: true
+      env:
+        NODE_OPTIONS: "--use-openssl"
