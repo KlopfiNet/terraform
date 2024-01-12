@@ -51,3 +51,8 @@ make apply
 ### New nodes
 To add new nodes, add them to `main.tf` in the root directory under `module "kube-machine"`.  
 Furhter sizing options can be conducted in there.
+
+### CI
+Upon inventory generation, a CI action will attempt to upload the new inventory into the ansible repo.  
+For caching purposes, the runners are expected to have a `/cache` directory mounted.  
+Attempts to get S3 or GH cache targets to work have been in vain.
