@@ -44,7 +44,6 @@ jobs:
     - name: Update inventory in remote
       if: steps.inventory-comparison.outputs.VERDICT == 'is_different'
       run: |
-        cd ./ansible
         cp /cache/current-inventory ./inventories/inventory_all.ini
         
         git config user.name "klopfi-bot"
