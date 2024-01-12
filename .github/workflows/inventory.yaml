@@ -45,12 +45,18 @@ jobs:
       if: steps.inventory-comparison.outputs.VERDICT == 'is_different'
       run: |
         cp /cache/current-inventory ./inventories/inventory_all.ini
+
+        BRANCH_NAME="update/inventory"
         
         git config user.name "klopfi-bot"
         git config user.email "git@klopfi.net"
         git config push.autoSetupRemote true
 
-        git checkout -b "update/inventory"
+        if [ $(git ls-remote --heads origin $BRANCH_NAMEA | grep $BRANCH_NAME | wc -l) -gt 0 ]; then
+          git checkout $BRANCH_NAME
+        else
+          git checkout -b $BRANCH_NAME
+        fi
 
         git add ./inventories/inventory_all.ini
         git commit -m "Update inventory"
