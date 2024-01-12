@@ -5,10 +5,12 @@ on:
     paths-ignore:
       - 'ci/**'
       - '.github/**'
+      - '*.md'
   pull_request:
     paths-ignore:
       - 'ci/**'
       - '.github/**'
+      - '*.md'
 
 jobs:
   tflint:
