@@ -34,18 +34,18 @@ jobs:
 
     - uses: actions/checkout@v4
       name: Check out ansible repo
-      if: steps.inventory-comparison.outputs.VERDICT == "is_different"
+      if: steps.inventory-comparison.outputs.VERDICT == 'is_different'
       with:
         repository: "https://github.com/KlopfiNet/ansible.git"
         sparse-checkout: inventories
 
     - name: Move new inventory
-      if: steps.inventory-comparison.outputs.VERDICT == "is_different"
+      if: steps.inventory-comparison.outputs.VERDICT == 'is_different'
       run: cp ~/inventory ./ansible/inventories/inventory_all.ini
 
     - uses: EndBug/add-and-commit@v9
       name: Update inventory in remote
-      if: steps.inventory-comparison.outputs.VERDICT == "is_different"
+      if: steps.inventory-comparison.outputs.VERDICT == 'is_different'
       with:
         cwd: './ansible'
         add: 'inventories/inventory_all.ini'
