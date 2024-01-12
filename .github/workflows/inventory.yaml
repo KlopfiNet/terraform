@@ -41,20 +41,21 @@ jobs:
         sparse-checkout: inventories
         ssh-key: ${{ secrets.KEY_KLOPFI_BOT }}
 
-    - name: Move new inventory
+    - name: Update inventory in remote
       if: steps.inventory-comparison.outputs.VERDICT == 'is_different'
-      run: cp /cache/current-inventory ./inventories/inventory_all.ini
+      run: |
+        cd ./ansible
+        cp /cache/current-inventory ./inventories/inventory_all.ini
+        
+        git config user.name "klopfi-bot"
+        git config user.email "git@klopfi.net"
+        git config push.autoSetupRemote true
 
-    - uses: EndBug/add-and-commit@v9
-      name: Update inventory in remote
-      if: steps.inventory-comparison.outputs.VERDICT == 'is_different'
-      with:
-        cwd: './ansible'
-        add: 'inventories/inventory_all.ini'
-        author_name: klopfi-bot
-        author_email: git@klopfi.net
-        message: 'Update inventory'
-        new_branch: update-inventory
+        git checkout -b "update/inventory"
+
+        git add ./inventories/inventory_all.ini
+        git commit -m "Update inventory"
+        git push
 
     - name: Cache new inventory
       id: cache-inventory-save
