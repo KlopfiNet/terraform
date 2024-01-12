@@ -32,7 +32,7 @@ jobs:
       if: steps.inventory-cache.outputs.VERDICT == 'exists'
       id: inventory-comparison
       run: |
-        run=$(./ci/compare_inventories.sh)
+        run=$(./ci/compare_inventories.sh | tail -n 1)
         echo "VERDICT=$run" >> "$GITHUB_OUTPUT"
 
     - uses: actions/checkout@v4
