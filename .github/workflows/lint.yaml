@@ -2,7 +2,13 @@ name: Lint
 on:
   push:
     branches: [ main ]
+    paths-ignore:
+      - 'ci/**'
+      - '.github/**'
   pull_request:
+    paths-ignore:
+      - 'ci/**'
+      - '.github/**'
 
 jobs:
   tflint:

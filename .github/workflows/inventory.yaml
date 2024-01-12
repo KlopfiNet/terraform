@@ -18,10 +18,10 @@ jobs:
       with:
         path: ~/inventory-restore
         key: inventory-terraform
-        aws-s3-bucket: ${{ variables.GH_ARTIFACTS_BUCKET_NAME }}
+        aws-s3-bucket: ${{ vars.GH_ARTIFACTS_BUCKET_NAME }}
         aws-access-key-id: ${{ secrets.GH_ARTIFACT_BUCKET_ACC_KEY }}
         aws-secret-access-key: ${{ secrets.GH_ARTIFACT_BUCKET_SEC_KEY }}
-        aws-endpoint: ${{ variables.S3_ENDPOINT }}
+        aws-endpoint: ${{ vars.S3_ENDPOINT }}
         aws-s3-bucket-endpoint: false
         aws-s3-force-path-style: true
 
@@ -74,9 +74,9 @@ jobs:
       with:
         path: ~/inventory
         key: inventory-terraform
-        aws-s3-bucket: ${{ variables.GH_ARTIFACTS_BUCKET_NAME }}
+        aws-s3-bucket: ${{ vars.GH_ARTIFACTS_BUCKET_NAME }}
         aws-access-key-id: ${{ secrets.GH_ARTIFACT_BUCKET_ACC_KEY }}
         aws-secret-access-key: ${{ secrets.GH_ARTIFACT_BUCKET_SEC_KEY }}
-        aws-endpoint: ${{ variables.S3_ENDPOINT }}
+        aws-endpoint: ${{ vars.S3_ENDPOINT }}
         aws-s3-bucket-endpoint: false
         aws-s3-force-path-style: true
