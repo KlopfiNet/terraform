@@ -11,8 +11,11 @@ diff=$(diff /cache/current-inventory /cache/inventory-cache | wc -l) || exit 1
 echo "[i] Diff is: $diff"
 
 if [ $diff -gt 0 ]; then
-    echo "is_different"
+    echo "::warning title=INV_DIFFER::Inventories are different"
+    verdict="is_different"
 else
     echo "::notice title=INV_IDENTICAL::Inventories are the same"
-    echo "is_identical"
+    verdict="is_identical"
 fi
+
+echo "VERDICT=$verdict" >> "$GITHUB_OUTPUT"

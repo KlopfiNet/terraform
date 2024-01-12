@@ -31,9 +31,7 @@ jobs:
     - name: Compare inventories
       if: steps.inventory-cache.outputs.VERDICT == 'exists'
       id: inventory-comparison
-      run: |
-        run=$(./ci/compare_inventories.sh | tail -n 1)
-        echo "VERDICT=$run" >> "$GITHUB_OUTPUT"
+      run: ./ci/compare_inventories.sh
 
     - uses: actions/checkout@v4
       name: Check out ansible repo
