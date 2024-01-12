@@ -5,8 +5,8 @@
 ${host.name} ansible_host=${ip_network}.${host.ip_octet}
 %{ endif ~}
 %{ endfor ~}
-%{ endfor ~}
 
+%{ endfor ~}
 [cluster:children]
 %{ for role in distinct([for h in hosts : h.role]) ~}
 ${ role }
