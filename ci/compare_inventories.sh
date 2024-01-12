@@ -3,11 +3,11 @@
 
 set -e
 
-for EXPECTED_FILE in "~/inventory" "~/inventory-restore"; do
+for EXPECTED_FILE in "~/inventory" "/cache/inventory-cache"; do
     ls $EXPECTED_FILE || exit 1
 done
 
-diff=$(diff ~/inventory ~/inventory-restore | wc -l) || exit 1
+diff=$(diff ~/inventory /cache/inventory-cache | wc -l) || exit 1
 echo "[i] Diff is: $diff"
 
 if [ $diff -gt 0 ]; then

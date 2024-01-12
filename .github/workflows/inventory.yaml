@@ -12,23 +12,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - uses: whywaita/actions-cache-s3/restore@v2
-      name: Restore cache
-      id: cache-inventory-restore
-      with:
-        path: ~/inventory-restore
-        key: inventory-terraform
-        aws-s3-bucket: ${{ vars.GH_ARTIFACTS_BUCKET_NAME }}
-        aws-access-key-id: ${{ secrets.GH_ARTIFACT_BUCKET_ACC_KEY }}
-        aws-secret-access-key: ${{ secrets.GH_ARTIFACT_BUCKET_SEC_KEY }}
-        aws-endpoint: ${{ vars.S3_ENDPOINT }}
-        aws-region: us-east-1
-        aws-s3-bucket-endpoint: false
-        aws-s3-force-path-style: true
-      env:
-        NODE_EXTRA_CA_CERTS: "/etc/ssl/certs/ca-certificates.crt"
-        # Required as node would use its own trust store
-
     - name: Terraform init
       run: terraform init
       env:
@@ -41,9 +24,15 @@ jobs:
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.TF_STATE_BUCKET_ACC_KEY }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.TF_STATE_BUCKET_SEC_KEY }}
+      
+    - name: Check if inventory is cached
+      id: inventory-cache
+      run: |
+        [ -f /cache/inventory-cache ] && verdict=exists || verdict=missing
+        echo "VERDICT=$verdict" >> "$GITHUB_OUTPUT"
 
     - name: Compare inventories
-      if: steps.inventory-cache-restore.outputs.cache-hit == 'true'
+      if: steps.inventory-cache.outputs.VERDICT == 'exists'
       id: inventory-comparison
       run: |
         run=$(./ci/compare_inventories.sh)
@@ -72,18 +61,6 @@ jobs:
         message: 'Update inventory'
         new_branch: update-inventory
 
-    - uses: whywaita/actions-cache-s3/save@v2
-      name: Cache new inventory
+    - name: Cache new inventory
       id: cache-inventory-save
-      with:
-        path: ~/inventory
-        key: inventory-terraform
-        aws-s3-bucket: ${{ vars.GH_ARTIFACTS_BUCKET_NAME }}
-        aws-access-key-id: ${{ secrets.GH_ARTIFACT_BUCKET_ACC_KEY }}
-        aws-secret-access-key: ${{ secrets.GH_ARTIFACT_BUCKET_SEC_KEY }}
-        aws-endpoint: ${{ vars.S3_ENDPOINT }}
-        aws-region: us-east-1
-        aws-s3-bucket-endpoint: false
-        aws-s3-force-path-style: true
-      env:
-        NODE_EXTRA_CA_CERTS: "/etc/ssl/certs/ca-certificates.crt"
+      run: cp ~/inventory /cache/inventory-cache
