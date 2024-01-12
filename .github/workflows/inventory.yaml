@@ -1,0 +1,70 @@
+name: Assemble inventory
+on:
+  push:
+    branches: 
+      - main
+  workflow_dispatch:
+
+jobs:
+  generate_inventory:
+    runs-on: kubernetes
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: actions/cache@v3
+      name: Restore cache
+      id: cache-inventory-restore
+      with:
+        path: ~/inventory-restore
+        key: inventory-terraform
+
+    - name: Terraform init
+      run: terraform init
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.TF_STATE_BUCKET_ACC_KEY }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.TF_STATE_BUCKET_SEC_KEY }}
+
+    - name: Generate inventory
+      id: generate-inventory
+      run: ./ci/assemble_inventory.sh > ~/inventory
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.TF_STATE_BUCKET_ACC_KEY }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.TF_STATE_BUCKET_SEC_KEY }}
+
+    - name: Compare inventories
+      if: steps.inventory-cache-restore.outputs.cache-hit == 'true'
+      id: inventory-comparison
+      run: |
+        run=$(./ci/compare_inventories.sh)
+        echo "VERDICT=$run" >> "$GITHUB_OUTPUT"
+
+    - uses: actions/checkout@v4
+      name: Check out ansible repo
+      if: steps.inventory-comparison.outputs.VERDICT == 'is_different'
+      with:
+        repository: "https://github.com/KlopfiNet/ansible.git"
+        sparse-checkout: inventories
+        ssh-key: ${{ secrets.KEY_KLOPFI_BOT }}
+
+    - name: Move new inventory
+      if: steps.inventory-comparison.outputs.VERDICT == 'is_different'
+      run: cp ~/inventory ./inventories/inventory_all.ini
+
+    - uses: EndBug/add-and-commit@v9
+      name: Update inventory in remote
+      if: steps.inventory-comparison.outputs.VERDICT == 'is_different'
+      with:
+        cwd: './ansible'
+        add: 'inventories/inventory_all.ini'
+        author_name: klopfi-bot
+        author_email: git@klopfi.net
+        message: 'Update inventory'
+        new_branch: update-inventory
+
+    - name: Cache new inventory
+      id: cache-inventory-save
+      uses: actions/cache/save@v3
+      with:
+        path: ~/inventory
+        key: inventory-terraform
