@@ -1,0 +1,62 @@
+name: Assemble inventory
+on:
+  push:
+    branches: 
+      - main
+      - feature/ci-inventory # debug
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  generate_inventory:
+    runs-on: kubernetes
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: actions/cache@v3
+      name: Restore cache
+      id: cache-inventory-restore
+      with:
+        path: ~/inventory-restore
+        key: inventory-terraform
+
+    - name: Generate inventory
+      id: generate-inventory
+      run: ./ci/assemble_inventory.sh > ~/inventory
+
+    - name: Compare inventories
+      if: steps.inventory-cache-restore.outputs.cache-hit == 'true'
+      id: inventory-comparison
+      run: |
+        run=$(./ci/compare_inventories.sh)
+        echo "VERDICT=$run" >> "$GITHUB_OUTPUT"
+
+    - uses: actions/checkout@v4
+      name: Check out ansible repo
+      if: steps.inventory-comparison.outputs.VERDICT == "is_different"
+      with:
+        repository: "https://github.com/KlopfiNet/ansible.git"
+        sparse-checkout: inventories
+
+    - name: Move new inventory
+      if: steps.inventory-comparison.outputs.VERDICT == "is_different"
+      run: cp ~/inventory ./ansible/inventories/inventory_all.ini
+
+    - uses: EndBug/add-and-commit@v9
+      name: Update inventory in remote
+      if: steps.inventory-comparison.outputs.VERDICT == "is_different"
+      with:
+        cwd: './ansible'
+        add: 'inventories/inventory_all.ini'
+        author_name: klopfi-bot
+        author_email: git@klopfi.net
+        message: 'Update inventory'
+        new_branch: update-inventory
+
+    - name: Cache new inventory
+      id: cache-inventory-save
+      uses: actions/cache/save@v3
+      with:
+        path: ~/inventory
+        key: inventory-terraform
