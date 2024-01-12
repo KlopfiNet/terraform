@@ -12,12 +12,18 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - uses: actions/cache@v3
+    - uses: whywaita/actions-cache-s3@v2
       name: Restore cache
       id: cache-inventory-restore
       with:
         path: ~/inventory-restore
         key: inventory-terraform
+        aws-s3-bucket: ${{ variables.GH_ARTIFACTS_BUCKET_NAME }}
+        aws-access-key-id: ${{ secrets.GH_ARTIFACT_BUCKET_ACC_KEY }}
+        aws-secret-access-key: ${{ secrets.GH_ARTIFACT_BUCKET_SEC_KEY }}
+        aws-endpoint: ${{ variables.S3_ENDPOINT }}
+        aws-s3-bucket-endpoint: false
+        aws-s3-force-path-style: true
 
     - name: Terraform init
       run: terraform init
@@ -62,9 +68,15 @@ jobs:
         message: 'Update inventory'
         new_branch: update-inventory
 
-    - name: Cache new inventory
+    - uses: whywaita/actions-cache-s3@v2
+      name: Cache new inventory
       id: cache-inventory-save
-      uses: actions/cache/save@v3
       with:
         path: ~/inventory
         key: inventory-terraform
+        aws-s3-bucket: ${{ variables.GH_ARTIFACTS_BUCKET_NAME }}
+        aws-access-key-id: ${{ secrets.GH_ARTIFACT_BUCKET_ACC_KEY }}
+        aws-secret-access-key: ${{ secrets.GH_ARTIFACT_BUCKET_SEC_KEY }}
+        aws-endpoint: ${{ variables.S3_ENDPOINT }}
+        aws-s3-bucket-endpoint: false
+        aws-s3-force-path-style: true
