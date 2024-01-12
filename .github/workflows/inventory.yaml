@@ -22,6 +22,7 @@ jobs:
         aws-access-key-id: ${{ secrets.GH_ARTIFACT_BUCKET_ACC_KEY }}
         aws-secret-access-key: ${{ secrets.GH_ARTIFACT_BUCKET_SEC_KEY }}
         aws-endpoint: ${{ vars.S3_ENDPOINT }}
+        aws-region: us-east-1
         aws-s3-bucket-endpoint: false
         aws-s3-force-path-style: true
 
@@ -78,5 +79,6 @@ jobs:
         aws-access-key-id: ${{ secrets.GH_ARTIFACT_BUCKET_ACC_KEY }}
         aws-secret-access-key: ${{ secrets.GH_ARTIFACT_BUCKET_SEC_KEY }}
         aws-endpoint: ${{ vars.S3_ENDPOINT }}
+        aws-region: us-east-1
         aws-s3-bucket-endpoint: false
         aws-s3-force-path-style: true
