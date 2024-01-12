@@ -26,8 +26,8 @@ jobs:
         aws-s3-bucket-endpoint: false
         aws-s3-force-path-style: true
       env:
-        NODE_OPTIONS: "--use-openssl-ca"
-        # Required as node would use its own truststore
+        NODE_EXTRA_CA_CERTS: "/etc/ssl/certs/ca-certificates.crt"
+        # Required as node would use its own trust store
 
     - name: Terraform init
       run: terraform init
@@ -86,4 +86,4 @@ jobs:
         aws-s3-bucket-endpoint: false
         aws-s3-force-path-style: true
       env:
-        NODE_OPTIONS: "--use-openssl-ca"
+        NODE_EXTRA_CA_CERTS: "/etc/ssl/certs/ca-certificates.crt"
