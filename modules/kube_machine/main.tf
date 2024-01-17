@@ -76,17 +76,23 @@ resource "proxmox_virtual_environment_vm" "node" {
   node_name   = var.pve_node_name
   vm_id       = each.value.vm_id
 
+/*
+"https://cloud.debian.org/images/cloud/bookworm/latest/debian-12-genericcloud-amd64.qcow2"
+replace(basename(var.vm_image_url), "qcow2", "img")
+*/
+
   tags = sort([
-    "debian",
-    "kubernetes",
+    # Automatically determine OS using image name: ">debian<-version-type.iso"
+    split(".", split("-", basename(var.vm_image_url))[0])[0],
     each.value.role,
-    "terraform"
+    "terraform",
+    "kubernetes"
   ])
 
   keyboard_layout = "de-ch"
 
   agent {
-    enabled = false
+    enabled = true
   }
 
   initialization {
