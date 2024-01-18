@@ -1,0 +1,5 @@
+%{ for host in hosts ~}
+Host ${host.name}
+IdentityFile ~/.ssh/ansible
+
+%{ endfor ~}

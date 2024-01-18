@@ -3,13 +3,15 @@ output "ansible_password" {
   sensitive = true
 }
 
-output "node_mac_addresses" {
-  value = values(proxmox_virtual_environment_vm.node)[*].mac_addresses
-}
-
 output "inventory" {
   value = templatefile("${path.module}/templates/inventory.tmpl", {
     hosts      = var.nodes
     ip_network = local.ip_network
+  })
+}
+
+output "ssh_config" {
+  value = templatefile("${path.module}/templates/ssh_config.tmpl", {
+    hosts      = var.nodes
   })
 }
