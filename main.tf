@@ -67,7 +67,6 @@ module "minio" {
 
   buckets = [
     "velero",
-    "kubernetes",
     "gh-artifacts"
   ]
 }
