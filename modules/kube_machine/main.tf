@@ -149,26 +149,3 @@ replace(basename(var.vm_image_url), "qcow2", "img")
     type = "l26"
   }
 }
-
-// Touch sentinel file on specific resource changes
-/*
-resource "terraform_data" "sentinel_trigger" {
-  for_each = { for n in var.nodes : n.name => n }
-
-  triggers_replace = [
-    proxmox_virtual_environment_vm.node[each.value.name].cpu,
-    proxmox_virtual_environment_vm.node[each.value.name].memory
-  ]
-
-  connection {
-    type        = "ssh"
-    user        = "ansible"
-    host        = "${local.ip_network}.${each.value.ip_octet}"
-    private_key = file("~/.ssh/ansible")
-  }
-
-  provisioner "remote-exec" {
-    inline = ["sudo touch /var/run/reboot-required"]
-  }
-}
-*/
