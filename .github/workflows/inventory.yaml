@@ -44,7 +44,8 @@ jobs:
     - name: Update inventory in remote
       if: steps.inventory-comparison.outputs.VERDICT == 'is_different'
       run: |
-        cp /cache/current-inventory ./inventories/inventory_all.ini
+        INVENTORY_FILE_NAME=all.ini
+        cp /cache/current-inventory ./inventories/$INVENTORY_FILE_NAME.ini
 
         BRANCH_NAME="update/inventory"
         
@@ -58,7 +59,7 @@ jobs:
           git checkout -b $BRANCH_NAME
         fi
 
-        git add ./inventories/inventory_all.ini
+        git add ./inventories/INVENTORY_FILE_NAME.ini
         git commit -m "Update inventory"
         git push
 
