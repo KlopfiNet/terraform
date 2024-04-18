@@ -73,7 +73,7 @@ jobs:
           echo "::error title=GH_TOKEN_MISSING::Missing env var GH_TOKEN"
           exit 1
         else
-          gh auth login -p ssh --skip-ssh-key
+          gh auth login -p ssh -h GitHub.com
         fi
 
         # Check if a PR already exists
