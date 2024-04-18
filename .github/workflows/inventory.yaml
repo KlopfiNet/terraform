@@ -48,7 +48,7 @@ jobs:
       if: steps.inventory-comparison.outputs.VERDICT == 'is_different'
       run: |
         INVENTORY_FILE_NAME=all.ini
-        cp /cache/current-inventory ./inventories/$INVENTORY_FILE_NAME.ini
+        cp /cache/current-inventory ./inventories/$INVENTORY_FILE_NAME
         
         git config user.name "klopfi-bot"
         git config user.email "git@klopfi.net"
@@ -60,7 +60,7 @@ jobs:
           git checkout -b $BRANCH_NAME
         fi
 
-        git add ./inventories/INVENTORY_FILE_NAME.ini
+        git add ./inventories/$INVENTORY_FILE_NAME
         git commit -m "Update inventory"
         git push
 
