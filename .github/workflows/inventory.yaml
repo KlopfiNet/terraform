@@ -48,18 +48,24 @@ jobs:
       if: steps.inventory-comparison.outputs.VERDICT == 'is_different'
       run: |
         INVENTORY_FILE_NAME=all.ini
+        echo "Copying inventory..."
         cp /cache/current-inventory ./inventories/$INVENTORY_FILE_NAME
         
+        echo "Setting up git config..."
         git config user.name "klopfi-bot"
         git config user.email "git@klopfi.net"
         git config push.autoSetupRemote true
 
+        echo "Checking out '$BRANCH_NAME'..."
         if [ $(git ls-remote --heads origin $BRANCH_NAME | grep $BRANCH_NAME | wc -l) -gt 0 ]; then
+          echo "> Using existing branch"
           git checkout $BRANCH_NAME
         else
+          echo "> Creating new branch"
           git checkout -b $BRANCH_NAME
         fi
 
+        echo "Adding and commiting..."
         git add ./inventories/$INVENTORY_FILE_NAME
         git commit -m "Update inventory"
         git push
