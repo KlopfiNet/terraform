@@ -9,6 +9,9 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Set env
+      run: echo "BRANCH_NAME=update/inventory" >> $GITHUB_ENV
+
     - name: Terraform init
       run: terraform init
       env:
@@ -46,14 +49,12 @@ jobs:
       run: |
         INVENTORY_FILE_NAME=all.ini
         cp /cache/current-inventory ./inventories/$INVENTORY_FILE_NAME.ini
-
-        BRANCH_NAME="update/inventory"
         
         git config user.name "klopfi-bot"
         git config user.email "git@klopfi.net"
         git config push.autoSetupRemote true
 
-        if [ $(git ls-remote --heads origin $BRANCH_NAMEA | grep $BRANCH_NAME | wc -l) -gt 0 ]; then
+        if [ $(git ls-remote --heads origin $BRANCH_NAME | grep $BRANCH_NAME | wc -l) -gt 0 ]; then
           git checkout $BRANCH_NAME
         else
           git checkout -b $BRANCH_NAME
@@ -62,6 +63,26 @@ jobs:
         git add ./inventories/INVENTORY_FILE_NAME.ini
         git commit -m "Update inventory"
         git push
+
+    - name: Pull request
+      if: steps.inventory-comparison.outputs.VERDICT == 'is_different'
+      env:
+        GH_TOKEN: ${{ secrets.GH_BOT_PAT }}
+      run: |
+        if [ -z "$GH_TOKEN" ]; then
+          echo "::error title=GH_TOKEN_MISSING::Missing env var GH_TOKEN"
+          exit 1
+        else
+          gh auth login -p ssh --skip-ssh-key
+        fi
+
+        # Check if a PR already exists
+        if [ $(gh pr list -s open -H $BRANCH_BAME --json id | jq length) -eq 0 ]; then
+          gh pr create -a ThisIsntTheWay -B $BRANCH_BAME -H master -t "Update inventory" -b "Update inventory"
+          echo "::notice title=PR_CREATED::A pull request has been created"
+        else
+          echo "::notice title=PR_EXISTS::A pull request is already active"
+        fi
 
     - name: Cache new inventory
       id: cache-inventory-save
