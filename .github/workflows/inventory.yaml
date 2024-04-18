@@ -59,10 +59,10 @@ jobs:
         echo "Checking out '$BRANCH_NAME'..."
         if [ $(git ls-remote --heads origin $BRANCH_NAME | grep $BRANCH_NAME | wc -l) -gt 0 ]; then
           echo "> Using existing branch"
-          git checkout $BRANCH_NAME
+          git switch $BRANCH_NAME
         else
           echo "> Creating new branch"
-          git checkout -b $BRANCH_NAME
+          git switch -c $BRANCH_NAME
         fi
 
         echo "Adding and commiting..."
