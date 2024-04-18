@@ -48,6 +48,7 @@ jobs:
       if: steps.inventory-comparison.outputs.VERDICT == 'is_different'
       run: |
         INVENTORY_FILE_NAME=all.ini
+
         echo "Copying inventory..."
         cp /cache/current-inventory ./inventories/$INVENTORY_FILE_NAME
         
@@ -57,6 +58,7 @@ jobs:
         git config push.autoSetupRemote true
 
         echo "Checking out '$BRANCH_NAME'..."
+        git fetch --all
         if [ $(git ls-remote --heads origin $BRANCH_NAME | grep $BRANCH_NAME | wc -l) -gt 0 ]; then
           echo "> Using existing branch"
           git switch $BRANCH_NAME
