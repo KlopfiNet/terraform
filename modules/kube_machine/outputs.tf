@@ -5,13 +5,13 @@ output "ansible_password" {
 
 output "inventory" {
   value = templatefile("${path.module}/templates/inventory.tmpl", {
-    hosts      = var.nodes
+    hosts      = local.node_instances
     ip_network = local.ip_network
   })
 }
 
 output "ssh_config" {
   value = templatefile("${path.module}/templates/ssh_config.tmpl", {
-    hosts      = var.nodes
+    hosts = local.node_instances
   })
 }

@@ -16,21 +16,33 @@ terraform {
 }
 
 locals {
-  vm_resources = {
-    "master" = {
-      sockets = var.node_master_cpu_sockets,
-      cpu     = var.node_master_cpu_cores,
-      memory  = var.node_master_memory
-      }, "worker" = {
-      sockets = var.node_worker_cpu_sockets,
-      cpu     = var.node_worker_cpu_cores,
-      memory  = var.node_worker_memory
-      }, "infra" = {
-      sockets = var.node_infra_cpu_sockets,
-      cpu     = var.node_infra_cpu_cores,
-      memory  = var.node_infra_memory
-    }
+  # 10.0.1.<ip_ident><node_index>
+  ip_ident = {
+    master = 9
+    worker = 10
+    infra  = 11
   }
+
+  # <vmid_ident><node_index>; 10.0.1.81 (master, first node)
+  vmid_ident = {
+    master = 8
+    worker = 9
+    infra  = 1
+  }
+
+  node_instances = flatten([
+    for node_key, node_value in var.nodes : [
+      for i in range(node_value.count) : {
+        role      = node_key
+        instance  = i + 1
+        name      = "kubernetes-${node_key}-${i + 1}"
+        vmid      = "9${local.vmid_ident[node_key]}${i + 1}"
+        ip        = "${local.ip_network}.${local.ip_ident[node_key]}${i + 1}"
+        ip_octet  = "${local.ip_ident[node_key]}${i + 1}"
+        resources = node_value.resources
+      }
+    ]
+  ])
 }
 
 resource "random_password" "password" {
@@ -51,7 +63,7 @@ resource "proxmox_virtual_environment_file" "os_image" {
 }
 
 resource "proxmox_virtual_environment_file" "provision_file" {
-  for_each = { for n in var.nodes : n.name => n }
+  for_each = { for idx, instance in local.node_instances : "${instance.role}-${instance.instance}" => instance }
 
   content_type = "snippets"
   datastore_id = var.pve_datastore_data
@@ -64,19 +76,19 @@ resource "proxmox_virtual_environment_file" "provision_file" {
       password = random_password.password.result
     })
 
-    file_name = "cloud_config-${each.value.vm_id}.yaml"
+    file_name = "cloud_config-${each.value.vmid}.yaml"
   }
 }
 
 resource "proxmox_virtual_environment_vm" "node" {
-  for_each = { for n in var.nodes : n.name => n }
+  for_each = { for idx, instance in local.node_instances : "${instance.role}-${instance.instance}" => instance }
 
   name        = each.value.name
   description = "Managed by Terraform"
   node_name   = var.pve_node_name
-  vm_id       = each.value.vm_id
+  vm_id       = each.value.vmid
 
-/*
+  /*
 "https://cloud.debian.org/images/cloud/bookworm/latest/debian-12-genericcloud-amd64.qcow2"
 replace(basename(var.vm_image_url), "qcow2", "img")
 */
@@ -96,12 +108,12 @@ replace(basename(var.vm_image_url), "qcow2", "img")
   }
 
   initialization {
-    user_data_file_id = proxmox_virtual_environment_file.provision_file[each.value.name].id
+    user_data_file_id = proxmox_virtual_environment_file.provision_file["${each.key}"].id
 
     ip_config {
       # Somehow cannot be set in cloud-init file
       ipv4 {
-        address = "${local.ip_network}.${each.value.ip_octet}/24"
+        address = "${each.value.ip}/24"
         gateway = "${local.ip_network}.1"
       }
     }
@@ -113,12 +125,12 @@ replace(basename(var.vm_image_url), "qcow2", "img")
   }
 
   cpu {
-    cores   = local.vm_resources[each.value.role].cpu
-    sockets = local.vm_resources[each.value.role].sockets
+    cores   = each.value.resources.cores
+    sockets = each.value.resources.sockets
   }
 
   memory {
-    dedicated = local.vm_resources[each.value.role].memory
+    dedicated = each.value.resources.memory
   }
 
   startup {

@@ -9,7 +9,7 @@ locals {
 }
 
 resource "dns_a_record_set" "kube_machine" {
-  for_each = { for n in var.nodes : n.name => n }
+  for_each = { for idx, instance in local.node_instances : "${instance.role}-${instance.instance}" => instance }
 
   zone = "${local.dns_zone}."
   name = each.value.name
@@ -20,10 +20,10 @@ resource "dns_a_record_set" "kube_machine" {
 }
 
 resource "dns_ptr_record" "kube_machine" {
-  for_each = { for n in var.nodes : n.name => n }
+  for_each = { for idx, instance in local.node_instances : "${instance.role}-${instance.instance}" => instance }
 
   zone = "${local.reverse_zone_ip}.in-addr.arpa."
   name = each.value.ip_octet
-  ptr = "${each.value.name}.${local.dns_zone}."
-  ttl = 300
+  ptr  = "${each.value.name}.${local.dns_zone}."
+  ttl  = 300
 }
