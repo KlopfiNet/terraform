@@ -1,3 +1,12 @@
+terraform { 
+  required_providers {
+    proxmox = {
+      source  = "bpg/proxmox"
+      version = ">= 0.63.0"
+    }
+  }
+}
+
 variable "pve_node_name" {
   description = "Name of the pve node"
   type        = string

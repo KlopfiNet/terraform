@@ -1,20 +1,3 @@
-terraform {
-  required_providers {
-    proxmox = {
-      source  = "bpg/proxmox"
-      version = "0.38.1"
-    }
-    random = {
-      source  = "hashicorp/random"
-      version = "3.5.1"
-    }
-    dns = {
-      source  = "hashicorp/dns"
-      version = "3.3.2"
-    }
-  }
-}
-
 locals {
   # 10.0.1.<ip_ident><node_index>
   ip_ident = {
@@ -51,17 +34,6 @@ resource "random_password" "password" {
   special          = true
 }
 
-resource "proxmox_virtual_environment_file" "os_image" {
-  content_type = "iso"
-  datastore_id = var.pve_datastore_data
-  node_name    = var.pve_node_name
-
-  source_file {
-    path      = var.vm_image_url
-    file_name = replace(basename(var.vm_image_url), "qcow2", "img")
-  }
-}
-
 resource "proxmox_virtual_environment_file" "provision_file" {
   for_each = { for idx, instance in local.node_instances : "${instance.role}-${instance.instance}" => instance }
 
@@ -88,14 +60,7 @@ resource "proxmox_virtual_environment_vm" "node" {
   node_name   = var.pve_node_name
   vm_id       = each.value.vmid
 
-  /*
-"https://cloud.debian.org/images/cloud/bookworm/latest/debian-12-genericcloud-amd64.qcow2"
-replace(basename(var.vm_image_url), "qcow2", "img")
-*/
-
   tags = sort([
-    # Automatically determine OS using image name: ">debian<-version-type.iso"
-    split(".", split("-", basename(var.vm_image_url))[0])[0],
     each.value.role,
     "terraform",
     "kubernetes"
@@ -139,16 +104,20 @@ replace(basename(var.vm_image_url), "qcow2", "img")
     down_delay = "10"
   }
 
-  disk {
+  clone {
     datastore_id = var.pve_datastore_vm
-    file_id      = proxmox_virtual_environment_file.os_image.id
-    interface    = "scsi0"
-
-    size = "20"
-    # Provider default of 8GB wants to shrink the image, resulting in an error:
-    #  qemu-img: Use the --shrink option to perform a shrink operation.
-    #  qemu-img: warning: Shrinking an image will delete all data beyond the shrunken image's end. Before performing such an operation, make sure there is no important data there.
+    vm_id = var.vm_template_id
   }
+  #disk {
+  #  datastore_id = var.pve_datastore_vm
+  #  file_id      = proxmox_virtual_environment_file.os_image.id
+  #  interface    = "scsi0"
+#
+  #  size = "20"
+  #  # Provider default of 8GB wants to shrink the image, resulting in an error:
+  #  #  qemu-img: Use the --shrink option to perform a shrink operation.
+  #  #  qemu-img: warning: Shrinking an image will delete all data beyond the shrunken image's end. Before performing such an operation, make sure there is no important data there.
+  #}
 
   timeout_create = "2400"
 

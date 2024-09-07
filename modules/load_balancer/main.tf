@@ -1,12 +1,3 @@
-terraform {
-  required_providers {
-    proxmox = {
-      source  = "bpg/proxmox"
-      version = "0.38.1"
-    }
-  }
-}
-
 locals {
   vm_network_address = join(".", slice(split(".", var.vm_ip_address), 0, 3))
   # Last octet and . are removed, e.g.: 10.0.1.50 -> 10.0.1
