@@ -55,7 +55,7 @@ provider "proxmox" {
 # -------------------------------------------
 
 locals {
-  ssh_pub = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGEch+fpr62X3Lb4qvEREysIHnhB6nrdZKbzWF/OSIri ansible"
+  ssh_pub      = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGEch+fpr62X3Lb4qvEREysIHnhB6nrdZKbzWF/OSIri ansible"
   pve_password = var.pve_password
 }
 

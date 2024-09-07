@@ -84,8 +84,8 @@ resource "proxmox_virtual_environment_vm" "node" {
     }
 
     dns {
-      server = "${local.ip_network}.20"
-      domain = "klopfi.net"
+      servers = ["${local.ip_network}.20"]
+      domain  = "klopfi.net"
     }
   }
 
@@ -106,13 +106,13 @@ resource "proxmox_virtual_environment_vm" "node" {
 
   clone {
     datastore_id = var.pve_datastore_vm
-    vm_id = var.vm_template_id
+    vm_id        = var.vm_template_id
   }
   #disk {
   #  datastore_id = var.pve_datastore_vm
   #  file_id      = proxmox_virtual_environment_file.os_image.id
   #  interface    = "scsi0"
-#
+  #
   #  size = "20"
   #  # Provider default of 8GB wants to shrink the image, resulting in an error:
   #  #  qemu-img: Use the --shrink option to perform a shrink operation.

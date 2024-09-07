@@ -72,8 +72,8 @@ resource "proxmox_virtual_environment_vm" "load_balancer" {
     }
 
     dns {
-      server = "${local.vm_network_address}.20"
-      domain = "klopfi.net"
+      servers = ["${local.vm_network_address}.20"]
+      domain  = "klopfi.net"
     }
   }
 
