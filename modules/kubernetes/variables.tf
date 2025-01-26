@@ -1,40 +1,14 @@
 variable "nodes" {
   description = "node configuration set."
   type = list(object({
-    name     = string,
-    ip_octet = number,
-    vm_id    = number,
-    role     = string,
+    role  = string,
+    count = number
   }))
-
-  // Validate that name is unique
-  validation {
-    condition     = length(var.nodes) == length(distinct([for n in var.nodes : n.name]))
-    error_message = "The node name must be unique."
-  }
-
-  // Validate that ip_octet is a number between 2 and 25
-  validation {
-    condition     = alltrue([for n in var.nodes : n.ip_octet > 1 && n.ip_octet < 255])
-    error_message = "The node ip_octet must be a number between 2 and 254."
-  }
 
   // Check that role is of an authorized list
   validation {
     condition     = alltrue([for node in var.nodes : contains(["master", "worker", "infra"], node.role)])
     error_message = "Non-accepted machine role provided."
-  }
-
-  // Validate that ip_octet is unique
-  validation {
-    condition     = length(var.nodes) == length(distinct([for n in var.nodes : n.ip_octet]))
-    error_message = "IP (octet) collision."
-  }
-
-  // Validate VM vm_id
-  validation {
-    condition     = alltrue([for n in var.nodes : n.vm_id >= 900 && n.vm_id <= 1000])
-    error_message = "The VM vm_id must be a number between 900 and 1000."
   }
 
   // ----- Master node validations
@@ -115,8 +89,19 @@ variable "node_infra_cpu_sockets" {
   type        = number
 }
 
-// ---------------------------
+variable "talos_version" {
+  description = "Talos version"
+  default     = "v1.9.2"
+  type        = string
+}
+variable "kubernetes_version" {
+  description = "Kubernetes version"
+  default     = "v1.32.0"
+  type        = string
+}
 
+// ---------------------------
+/*
 variable "node_ssh_key" {
   description = "SSH pub of key to use for user account."
   type        = string
@@ -128,3 +113,4 @@ variable "vm_image_url" {
   default     = "https://cloud.debian.org/images/cloud/bookworm/latest/debian-12-genericcloud-amd64.qcow2"
   #"https://download.rockylinux.org/pub/rocky/9/images/x86_64/Rocky-9-GenericCloud-Base.latest.x86_64.qcow2"
 }
+*/

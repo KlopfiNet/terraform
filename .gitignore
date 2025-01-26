@@ -4,6 +4,10 @@ secret*/**
 *.ign
 backend.conf
 
+.env
+
+test/**
+
 # Local .terraform directories
 **/.terraform/*
 

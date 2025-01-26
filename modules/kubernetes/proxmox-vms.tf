@@ -1,31 +1,16 @@
-terraform {
-  required_providers {
-    proxmox = {
-      source  = "bpg/proxmox"
-      version = "0.38.1"
-    }
-    random = {
-      source  = "hashicorp/random"
-      version = "3.5.1"
-    }
-    dns = {
-      source  = "hashicorp/dns"
-      version = "3.3.2"
-    }
-  }
-}
-
 locals {
   vm_resources = {
     "master" = {
       sockets = var.node_master_cpu_sockets,
       cpu     = var.node_master_cpu_cores,
       memory  = var.node_master_memory
-      }, "worker" = {
+    },
+    "worker" = {
       sockets = var.node_worker_cpu_sockets,
       cpu     = var.node_worker_cpu_cores,
       memory  = var.node_worker_memory
-      }, "infra" = {
+    },
+    "infra" = {
       sockets = var.node_infra_cpu_sockets,
       cpu     = var.node_infra_cpu_cores,
       memory  = var.node_infra_memory
@@ -33,58 +18,27 @@ locals {
   }
 }
 
-resource "random_password" "password" {
-  length           = 16
-  override_special = "_%@"
-  special          = true
-}
-
-resource "proxmox_virtual_environment_file" "os_image" {
+resource "proxmox_virtual_environment_download_file" "os_image" {
   content_type = "iso"
   datastore_id = var.pve_datastore_data
   node_name    = var.pve_node_name
-
-  source_file {
-    path      = var.vm_image_url
-    file_name = replace(basename(var.vm_image_url), "qcow2", "img")
-  }
-}
-
-resource "proxmox_virtual_environment_file" "provision_file" {
-  for_each = { for n in var.nodes : n.name => n }
-
-  content_type = "snippets"
-  datastore_id = var.pve_datastore_data
-  node_name    = var.pve_node_name
-
-  source_raw {
-    data = templatefile("${path.module}/templates/cloud_config.tmpl", {
-      ssh_key  = var.node_ssh_key
-      hostname = each.value.name
-      password = random_password.password.result
-    })
-
-    file_name = "cloud_config-${each.value.vm_id}.yaml"
-  }
+  file_name    = "talos-${var.talos_version}.iso"
+  overwrite    = true
+  url          = data.talos_image_factory_urls.this.urls.iso
 }
 
 resource "proxmox_virtual_environment_vm" "node" {
-  for_each = { for n in var.nodes : n.name => n }
+  for_each = { for vm in local.vm_instances : vm.name => vm }
 
   name        = each.value.name
   description = "Managed by Terraform"
   node_name   = var.pve_node_name
-  vm_id       = each.value.vm_id
 
-/*
-"https://cloud.debian.org/images/cloud/bookworm/latest/debian-12-genericcloud-amd64.qcow2"
-replace(basename(var.vm_image_url), "qcow2", "img")
-*/
+  vm_id = each.value.vmid
 
   tags = sort([
-    # Automatically determine OS using image name: ">debian<-version-type.iso"
-    split(".", split("-", basename(var.vm_image_url))[0])[0],
     each.value.role,
+    "talos",
     "terraform",
     "kubernetes"
   ])
@@ -92,28 +46,21 @@ replace(basename(var.vm_image_url), "qcow2", "img")
   keyboard_layout = "de-ch"
 
   agent {
-    enabled = true
+    enabled = false
   }
 
   initialization {
-    user_data_file_id = proxmox_virtual_environment_file.provision_file[each.value.name].id
-
     ip_config {
-      # Somehow cannot be set in cloud-init file
       ipv4 {
         address = "${local.ip_network}.${each.value.ip_octet}/24"
         gateway = "${local.ip_network}.1"
       }
     }
-
-    dns {
-      server = "${local.ip_network}.20"
-      domain = "klopfi.net"
-    }
   }
 
   cpu {
     cores   = local.vm_resources[each.value.role].cpu
+    type    = "x86-64-v2-AES"
     sockets = local.vm_resources[each.value.role].sockets
   }
 
@@ -122,14 +69,15 @@ replace(basename(var.vm_image_url), "qcow2", "img")
   }
 
   startup {
-    order      = "3"
-    up_delay   = "0"
+    order      = each.value.role == "master" ? "1" : "2"
+    up_delay   = each.value.role == "master" ? "0" : "30"
     down_delay = "10"
   }
 
   disk {
     datastore_id = var.pve_datastore_vm
-    file_id      = proxmox_virtual_environment_file.os_image.id
+    file_id      = proxmox_virtual_environment_download_file.os_image.id
+    file_format  = "raw"
     interface    = "scsi0"
 
     size = "20"

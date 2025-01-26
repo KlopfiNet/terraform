@@ -1,8 +1,9 @@
 terraform {
   required_providers {
+    # Redefined in kubernetes module!
     proxmox = {
       source  = "bpg/proxmox"
-      version = "0.38.1"
+      version = ">= 0.70.0"
     }
   }
 
@@ -72,45 +73,15 @@ module "minio" {
 }
 
 # Kuberenetes
-module "kube_machine" {
-  source = "./modules/kube_machine"
+module "kubernetes" {
+  source = "./modules/kubernetes"
+
+  talos_version = "v1.9.1"
 
   nodes = [
     {
-      name     = "kubernetes-master-01"
-      ip_octet = 80
-      vm_id    = 900
-      role     = "master"
-    },
-    {
-      name     = "kubernetes-master-02"
-      ip_octet = 81
-      vm_id    = 901
-      role     = "master"
-    },
-    {
-      name     = "kubernetes-master-03"
-      ip_octet = 82
-      vm_id    = 902
-      role     = "master"
-    },
-    {
-      name     = "kubernetes-worker-01"
-      ip_octet = 85
-      vm_id    = 910
-      role     = "worker"
-    },
-    {
-      name     = "kubernetes-worker-02"
-      ip_octet = 86
-      vm_id    = 911
-      role     = "worker"
-    },
-    {
-      name     = "kubernetes-infra-01"
-      ip_octet = 90
-      vm_id    = 920
-      role     = "infra"
+      role  = "master"
+      count = 1
     }
   ]
 
@@ -126,30 +97,11 @@ module "kube_machine" {
   node_infra_cpu_sockets = 1
   node_infra_cpu_cores   = 2
   node_infra_memory      = 7168
-
-  node_ssh_key = local.ssh_pub
-}
-
-# Load balancer
-module "load_balancer" {
-  source = "./modules/load_balancer"
-
-  vm_cpu_cores  = 1
-  vm_memory     = 512
-  vm_ip_address = "10.0.1.84"
-  vm_ssh_key    = local.ssh_pub
-  vm_id         = 300
 }
 
 # -------------------------------------------
-
-output "kube_machine" {
-  value     = module.kube_machine
-  sensitive = true
-}
-
-output "load_balancer" {
-  value     = module.load_balancer
+output "kubernetes" {
+  value     = module.kubernetes
   sensitive = true
 }
 
