@@ -75,10 +75,14 @@ module "kubernetes" {
   nodes = [
     {
       role  = "controlplane"
-      count = 3
+      count = 1
     },
     {
       role  = "worker"
+      count = 1
+    },
+    {
+      role  = "infra"
       count = 1
     }
   ]

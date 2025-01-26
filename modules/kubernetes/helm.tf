@@ -18,8 +18,16 @@ data "helm_template" "cilium" {
       enabled = true
     }
     bpf = {
-      masquerade = true
+      hostLegacyRouting = true # Otherwise, DNS resolution seems to fail (talos 1.9.2, cilium 1.16.6)
+      masquerade        = true
     }
+
+    # https://github.com/siderolabs/talos/issues/8836#issuecomment-2158601983
+    bandwidthManager = {
+      enabled = false
+      bbr     = true
+    }
+
     kubeProxyReplacement = true
     ipam = {
       mode = "kubernetes"

@@ -30,8 +30,9 @@ locals {
     null
   )
   role_to_configuration = {
-    "worker"       = data.talos_machine_configuration.worker.machine_configuration
     "controlplane" = data.talos_machine_configuration.controlplane.machine_configuration
+    "worker"       = data.talos_machine_configuration.worker.machine_configuration
+    "infra"        = data.talos_machine_configuration.infra.machine_configuration
   }
 }
 
@@ -66,6 +67,13 @@ data "talos_machine_configuration" "controlplane" {
             contents = join("---\n", [data.helm_template.cilium.manifest])
           }
         ]
+        apiServer = {
+          admissionControl = [
+            {
+              name = ""
+            }
+          ]
+        }
       }
     })
   ]
@@ -82,13 +90,6 @@ data "talos_machine_configuration" "worker" {
 
   config_patches = [
     yamlencode(local.config_network_common),
-    yamlencode({
-      machine = {
-        nodeLabels = {
-          "node-role.kubernetes.io/worker" = ""
-        }
-      }
-    })
   ]
 }
 
@@ -106,12 +107,17 @@ data "talos_machine_configuration" "infra" {
     yamlencode({
       machine = {
         nodeLabels = {
-          "node-role.kubernetes.io/worker" = ""
-          "node-role.kubernetes.io/infra"  = ""
-          "infra"                          = "true"
+          "infra" = "true"
         }
-        nodeTaints = {
-          "node-role.kubernetes.io/infra" = "true:NoSchedule"
+        kubelet = {
+          extraConfig = {
+            registerWithTaints = [
+              {
+                effect = "NoSchedule"
+                key    = "node-role.kubernetes.io/infra"
+              }
+            ]
+          }
         }
       }
     })

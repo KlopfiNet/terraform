@@ -24,7 +24,7 @@ locals {
         name  = "talos-${n.role}-${i + 1}"
 
         # Extend base vm_id by vmid_base + (n * 10): controlplane = 0, Worker = 10, Infra = 20
-        vmid     = local.vmid_base + ((n.role == "controlplane" ? 0 : (n.role == "worker" ? 1 : 2)) * 10) + i + 1
+        vmid     = local.vmid_base + ((n.role == "controlplane" ? 0 : (n.role == "worker" ? 1 : 3)) * 10) + i + 1
         ip_octet = (n.role == "controlplane" ? 30 : (n.role == "worker" ? 40 : 60)) + i + 1
       }
     ]
