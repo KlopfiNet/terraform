@@ -7,43 +7,43 @@ variable "nodes" {
 
   // Check that role is of an authorized list
   validation {
-    condition     = alltrue([for node in var.nodes : contains(["master", "worker", "infra"], node.role)])
+    condition     = alltrue([for node in var.nodes : contains(["controlplane", "worker", "infra"], node.role)])
     error_message = "Non-accepted machine role provided."
   }
 
-  // ----- Master node validations
-  // Check for an uneven amount of masters
+  // ----- controlplane node validations
+  // Check for an uneven amount of controlplanes
   // sum() is used, as the for[] can include true and false entries
   validation {
-    condition     = sum([for n in var.nodes : n.role == "master" ? 1 : 0]) % 2 == 1
-    error_message = "Must provide an uneven amount of master nodes"
+    condition     = sum([for n in var.nodes : n.role == "controlplane" ? 1 : 0]) % 2 == 1
+    error_message = "Must provide an uneven amount of controlplane nodes"
   }
 
-  // Check that at least one master has been defined
+  // Check that at least one controlplane has been defined
   validation {
-    condition     = length([for n in var.nodes : n.role == "master"]) >= 1
-    error_message = "No master node has been provided"
+    condition     = length([for n in var.nodes : n.role == "controlplane"]) >= 1
+    error_message = "No controlplane node has been provided"
   }
 }
 
-// ------------ MASTER
-variable "node_master_memory" {
-  description = "Amount of memory to allocate for master nodes. Provide in sizes of 1024."
+// ------------ controlplane
+variable "node_controlplane_memory" {
+  description = "Amount of memory to allocate for controlplane nodes. Provide in sizes of 1024."
   type        = number
 
   validation {
-    condition     = var.node_master_memory >= 3072
+    condition     = var.node_controlplane_memory >= 3072
     error_message = "Must provide at least 3GB (3072MB) of memory"
   }
 }
 
-variable "node_master_cpu_cores" {
-  description = "Amount of CPU cores to allocate for master nodes."
+variable "node_controlplane_cpu_cores" {
+  description = "Amount of CPU cores to allocate for controlplane nodes."
   type        = number
 }
 
-variable "node_master_cpu_sockets" {
-  description = "Amount of CPU sockets to allocate for master nodes."
+variable "node_controlplane_cpu_sockets" {
+  description = "Amount of CPU sockets to allocate for controlplane nodes."
   type        = number
 }
 

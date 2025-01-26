@@ -1,9 +1,9 @@
 locals {
   vm_resources = {
-    "master" = {
-      sockets = var.node_master_cpu_sockets,
-      cpu     = var.node_master_cpu_cores,
-      memory  = var.node_master_memory
+    "controlplane" = {
+      sockets = var.node_controlplane_cpu_sockets,
+      cpu     = var.node_controlplane_cpu_cores,
+      memory  = var.node_controlplane_memory
     },
     "worker" = {
       sockets = var.node_worker_cpu_sockets,
@@ -69,8 +69,8 @@ resource "proxmox_virtual_environment_vm" "node" {
   }
 
   startup {
-    order      = each.value.role == "master" ? "1" : "2"
-    up_delay   = each.value.role == "master" ? "0" : "30"
+    order      = each.value.role == "controlplane" ? "1" : "2"
+    up_delay   = each.value.role == "controlplane" ? "0" : "30"
     down_delay = "10"
   }
 

@@ -74,15 +74,19 @@ module "kubernetes" {
 
   nodes = [
     {
-      role  = "master"
+      role  = "controlplane"
+      count = 3
+    },
+    {
+      role  = "worker"
       count = 1
     }
   ]
 
   # Node sizing
-  node_master_cpu_sockets = 1
-  node_master_cpu_cores   = 2
-  node_master_memory      = 4096
+  node_controlplane_cpu_sockets = 1
+  node_controlplane_cpu_cores   = 2
+  node_controlplane_memory      = 4096
 
   node_worker_cpu_sockets = 1
   node_worker_cpu_cores   = 2

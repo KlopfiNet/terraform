@@ -21,15 +21,18 @@ locals {
       }
     }
   }
-
-  first_master_ip_octet = lookup(
+  first_controlplane_ip_octet = lookup(
     flatten([
       for vm in local.vm_instances :
-      (vm.role == "master" ? [vm] : [])
+      (vm.role == "controlplane" ? [vm] : [])
     ])[0],
     "ip_octet",
     null
   )
+  role_to_configuration = {
+    "worker"       = data.talos_machine_configuration.worker.machine_configuration
+    "controlplane" = data.talos_machine_configuration.controlplane.machine_configuration
+  }
 }
 
 data "talos_machine_configuration" "controlplane" {
@@ -78,7 +81,40 @@ data "talos_machine_configuration" "worker" {
   machine_type     = "worker"
 
   config_patches = [
-    yamlencode(local.config_network_common)
+    yamlencode(local.config_network_common),
+    yamlencode({
+      machine = {
+        nodeLabels = {
+          "node-role.kubernetes.io/worker" = ""
+        }
+      }
+    })
+  ]
+}
+
+data "talos_machine_configuration" "infra" {
+  kubernetes_version = var.kubernetes_version
+  talos_version      = var.talos_version
+
+  cluster_name     = local.cluster_name
+  cluster_endpoint = local.cluster_endpoint
+  machine_secrets  = talos_machine_secrets.common.machine_secrets
+  machine_type     = "worker"
+
+  config_patches = [
+    yamlencode(local.config_network_common),
+    yamlencode({
+      machine = {
+        nodeLabels = {
+          "node-role.kubernetes.io/worker" = ""
+          "node-role.kubernetes.io/infra"  = ""
+          "infra"                          = "true"
+        }
+        nodeTaints = {
+          "node-role.kubernetes.io/infra" = "true:NoSchedule"
+        }
+      }
+    })
   ]
 }
 
@@ -89,11 +125,11 @@ data "talos_client_configuration" "this" {
   endpoints            = [for vm in local.vm_instances : "${local.ip_network}.${vm.ip_octet}"]
 }
 
-resource "talos_machine_configuration_apply" "controlplane" {
+resource "talos_machine_configuration_apply" "this" {
   for_each = { for vm in local.vm_instances : vm.name => vm }
 
   client_configuration        = talos_machine_secrets.common.client_configuration
-  machine_configuration_input = data.talos_machine_configuration.controlplane.machine_configuration
+  machine_configuration_input = local.role_to_configuration[each.value.role]
   node                        = "${local.ip_network}.${each.value.ip_octet}"
   endpoint                    = "${local.ip_network}.${each.value.ip_octet}"
   config_patches = [
@@ -113,18 +149,18 @@ resource "talos_machine_configuration_apply" "controlplane" {
 
 resource "talos_machine_bootstrap" "this" {
   client_configuration = talos_machine_secrets.common.client_configuration
-  node                 = "${local.ip_network}.${local.first_master_ip_octet}"
-  endpoint             = "${local.ip_network}.${local.first_master_ip_octet}"
+  node                 = "${local.ip_network}.${local.first_controlplane_ip_octet}"
+  endpoint             = "${local.ip_network}.${local.first_controlplane_ip_octet}"
 
   depends_on = [
-    talos_machine_configuration_apply.controlplane
+    talos_machine_configuration_apply.this
   ]
 }
 
 resource "talos_cluster_kubeconfig" "this" {
   client_configuration = talos_machine_secrets.common.client_configuration
-  node                 = "${local.ip_network}.${local.first_master_ip_octet}"
-  endpoint             = "${local.ip_network}.${local.first_master_ip_octet}"
+  node                 = "${local.ip_network}.${local.first_controlplane_ip_octet}"
+  endpoint             = "${local.ip_network}.${local.first_controlplane_ip_octet}"
   depends_on = [
     talos_machine_bootstrap.this,
   ]
