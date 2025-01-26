@@ -1,3 +1,5 @@
+# All charts in this directory are simply made for bootstrapping.
+# They will all be managed by ArgoCD
 data "helm_template" "cilium" {
   name      = "cilium"
   namespace = "kube-system"
@@ -12,6 +14,12 @@ data "helm_template" "cilium" {
 
   # https://www.talos.dev/v1.9/kubernetes-guides/network/deploying-cilium/#without-kube-proxy
   values = [yamlencode({
+    egressGateway = {
+      enabled = true
+    }
+    bpf = {
+      masquerade = true
+    }
     kubeProxyReplacement = true
     ipam = {
       mode = "kubernetes"
