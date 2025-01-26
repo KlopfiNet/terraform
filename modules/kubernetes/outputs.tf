@@ -17,5 +17,5 @@ output "talos_image_data" {
 }
 
 output "talos_nodes" {
-  value = [for vm in local.vm_instances : "${local.ip_network}.${vm.ip_octet}"]
+  value = join(",", [for vm in local.vm_instances : "${local.ip_network}.${vm.ip_octet}"])
 }

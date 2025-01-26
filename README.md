@@ -38,7 +38,7 @@ terraform output -json | jq .kubernetes.value.talos_machine_config -r > $HOME/.t
 terraform output -json | jq .kubernetes.value.talos_kubeconfig -r > $HOME/.kube/config
 
 # Get talos nodes (e.g. for talosctl health --endpoints ...)
-terraform output -json | jq .kubernetes.value.talos_nodes
+terraform output -json | jq .kubernetes.value.talos_nodes -r
 
 # Get talos image data (debugging)
 terraform output -json | jq .kubernetes.value.talos_image_data
