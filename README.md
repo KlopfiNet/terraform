@@ -44,8 +44,3 @@ terraform output -json | jq .kubernetes.value.talos_nodes
 terraform output -json | jq .kubernetes.value.talos_image_data
 terraform output -json | jq .kubernetes.value.talos_image_data.talos_image_factory_schematic.schematic -r
 ```
-
-### CI
-Upon inventory generation, a CI action will attempt to upload the new inventory into the ansible repo.  
-For caching purposes, the runners are expected to have a `/cache` directory mounted.  
-Attempts to get S3 or GH cache targets to work have been in vain.
