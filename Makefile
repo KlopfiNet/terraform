@@ -9,3 +9,8 @@ plan: prepare
 
 apply: prepare
 	terraform apply -auto-approve --var-file=secret.tfvars
+
+extract-configs:
+	@echo "Extracting kubeconfig and talosconfig..."
+	@eval terraform output -json | jq .kubernetes.value.talos_kubeconfig -r > $$HOME/.kube/config
+	@eval terraform output -json | jq .kubernetes.value.talos_machine_config -r > $$HOME/.talos/config

@@ -27,6 +27,8 @@ export VAULT_TOKEN="..."
 ```bash
 make plan
 make apply # Caution: auto-approve
+
+make extract-configs
 ```
 
 ### Talos
