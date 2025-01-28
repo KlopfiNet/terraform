@@ -1,16 +1,16 @@
-# All charts in this directory are simply made for bootstrapping.
-# They will all be managed by ArgoCD
-data "helm_template" "cilium" {
+provider "helm" {
+  kubernetes {
+    config_path = "~/.kube/config"
+  }
+}
+
+resource "helm_release" "cilium" {
   name      = "cilium"
   namespace = "kube-system"
 
   chart      = "cilium"
   repository = "https://helm.cilium.io"
   version    = "1.16.6"
-
-  kube_version = var.kubernetes_version
-
-  include_crds = true
 
   # https://www.talos.dev/v1.9/kubernetes-guides/network/deploying-cilium/#without-kube-proxy
   values = [yamlencode({
@@ -31,6 +31,9 @@ data "helm_template" "cilium" {
     kubeProxyReplacement = true
     ipam = {
       mode = "kubernetes"
+      operator = {
+        clusterPoolIPv4PodCIDRList: ["10.43.0.0/16"]
+      }
     }
     securityContext = {
       capabilities = {

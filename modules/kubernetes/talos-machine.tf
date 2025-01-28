@@ -60,21 +60,6 @@ data "talos_machine_configuration" "controlplane" {
           ]
         }
       }
-      cluster = {
-        inlineManifests = [
-          {
-            name     = "cilium"
-            contents = join("---\n", [data.helm_template.cilium.manifest])
-          }
-        ]
-        apiServer = {
-          admissionControl = [
-            {
-              name = ""
-            }
-          ]
-        }
-      }
     })
   ]
 }
